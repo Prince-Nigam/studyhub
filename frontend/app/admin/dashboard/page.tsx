@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   Users, BookOpen, FileText, Video, Brain,
   TrendingUp, UserPlus, Activity, Layers,
-  Megaphone, RefreshCw, ArrowRight, CheckCircle
+  Megaphone, RefreshCw, ArrowRight, CheckCircle, Trophy
 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import api from '@/services/api';
@@ -19,19 +19,37 @@ import {
 export default function AdminDashboard() {
   const { theme } = useTheme();
   const isDark    = theme === 'dark';
-  const [stats, setStats]   = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
+  const [stats,       setStats]       = useState<any>(null);
+  const [loading,     setLoading]     = useState(true);
+  const [seeding,     setSeeding]     = useState(false);
+  const [tests,       setTests]       = useState<any[]>([]);
+  const [selTest,     setSelTest]     = useState('');
+  const [testResults, setTestResults] = useState<any[]>([]);
+  const [loadingRes,  setLoadingRes]  = useState(false);
 
   const fetchStats = async () => {
     try {
-      const res = await api.get('/admin/stats');
-      setStats(res.data.data);
+      const [statsRes, testsRes] = await Promise.all([
+        api.get('/admin/stats'),
+        api.get('/tests'),
+      ]);
+      setStats(statsRes.data.data);
+      setTests(testsRes.data.data || []);
     } catch { }
     finally { setLoading(false); }
   };
 
   useEffect(() => { fetchStats(); }, []);
+
+  const loadTestResults = async (testId: string) => {
+    if (!testId) { setTestResults([]); return; }
+    setLoadingRes(true);
+    try {
+      const r = await api.get(`/tests/${testId}/results`);
+      const sorted = (r.data.data || []).sort((a: any, b: any) => b.score - a.score);
+      setTestResults(sorted);
+    } catch {} finally { setLoadingRes(false); }
+  };
 
   const seedClasses = async () => {
     setSeeding(true);
@@ -269,6 +287,107 @@ export default function AdminDashboard() {
           </div>
         </motion.div>
       </div>
+
+      {/* Test Results Section */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+        className={`p-5 rounded-2xl border ${card}`}>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+          <h3 className="font-bold flex items-center gap-2">
+            <Trophy size={16} className="text-amber-400" /> Test Results Overview
+          </h3>
+          <div className="flex items-center gap-2">
+            <select value={selTest}
+              onChange={e => { setSelTest(e.target.value); loadTestResults(e.target.value); }}
+              className={`px-3 py-2 rounded-xl border text-sm focus:outline-none ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'}`}>
+              <option value="">-- Select a Test --</option>
+              {tests.map(t => <option key={t._id} value={t._id}>{t.title}</option>)}
+            </select>
+            <Link href="/admin/results">
+              <span className="text-xs text-violet-400 hover:text-violet-300 font-semibold whitespace-nowrap">Full Results →</span>
+            </Link>
+          </div>
+        </div>
+
+        {!selTest ? (
+          <p className="text-sm text-slate-500 text-center py-6">Select a test to see student results</p>
+        ) : loadingRes ? (
+          <p className="text-sm text-slate-500 text-center py-6">Loading...</p>
+        ) : testResults.length === 0 ? (
+          <p className="text-sm text-slate-500 text-center py-6">No results yet for this test</p>
+        ) : (
+          <>
+            {/* Top 3 summary */}
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              {[
+                { label:'🥇 Top Scorer',    student: testResults[0],                          color:'#FFD700' },
+                { label:'🥈 2nd Place',     student: testResults[1],                          color:'#C0C0C0' },
+                { label:'🔴 Lowest Score',  student: testResults[testResults.length - 1],     color:'#f87171' },
+              ].map((item, i) => item.student && (
+                <div key={i} style={{ padding:'12px', borderRadius:12, background: isDark?'rgba(255,255,255,0.04)':'#f8faff', border:`1px solid ${item.color}30` }}>
+                  <p style={{ fontSize:11, fontWeight:700, color:item.color, marginBottom:6 }}>{item.label}</p>
+                  <div className="flex items-center gap-2">
+                    <div style={{ width:28, height:28, borderRadius:'50%', background:`linear-gradient(135deg,${item.color}80,${item.color}40)`, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:12, color:'#fff', flexShrink:0 }}>
+                      {item.student.userId?.fullName?.[0]?.toUpperCase()}
+                    </div>
+                    <div style={{ minWidth:0 }}>
+                      <p style={{ fontSize:12, fontWeight:700, color: isDark?'#f1f5f9':'#1e293b', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                        {item.student.userId?.fullName}
+                      </p>
+                      <p style={{ fontSize:13, fontWeight:900, color:item.color }}>{item.student.percentage}%</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Full table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className={`border-b ${isDark?'border-slate-700':'border-slate-200'}`}>
+                    <th className="text-left py-2 px-3 text-xs font-bold text-slate-400">Rank</th>
+                    <th className="text-left py-2 px-3 text-xs font-bold text-slate-400">Student</th>
+                    <th className="text-center py-2 px-3 text-xs font-bold text-slate-400">Score</th>
+                    <th className="text-center py-2 px-3 text-xs font-bold text-slate-400">%</th>
+                    <th className="text-center py-2 px-3 text-xs font-bold text-slate-400">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {testResults.map((r, i) => (
+                    <tr key={i} className={`border-b ${isDark?'border-slate-700/50':'border-slate-100'} ${i===0?isDark?'bg-yellow-500/5':'bg-yellow-50/50':''}`}>
+                      <td className="py-2 px-3">
+                        <span style={{ fontWeight:800, color: i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'#64748b' }}>
+                          {i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}
+                        </span>
+                      </td>
+                      <td className="py-2 px-3">
+                        <div className="flex items-center gap-2">
+                          <div style={{ width:28, height:28, borderRadius:'50%', background:'linear-gradient(135deg,#7c3aed,#5b21b6)', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontSize:11, fontWeight:700, flexShrink:0 }}>
+                            {r.userId?.fullName?.[0]?.toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-sm">{r.userId?.fullName}</p>
+                            <p className="text-xs text-slate-500">{r.userId?.selectedClass || ''}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-2 px-3 text-center font-bold">{r.score}/{r.totalMarks}</td>
+                      <td className="py-2 px-3 text-center font-bold" style={{ color: r.percentage>=75?'#4ade80':r.percentage>=40?'#fbbf24':'#f87171' }}>
+                        {r.percentage}%
+                      </td>
+                      <td className="py-2 px-3 text-center">
+                        {r.passed
+                          ? <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-green-500/15 text-green-400">Passed</span>
+                          : <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-500/15 text-red-400">Failed</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </motion.div>
     </div>
   );
 }
