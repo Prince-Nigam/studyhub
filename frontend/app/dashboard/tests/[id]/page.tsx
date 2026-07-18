@@ -342,10 +342,10 @@ export default function TestDetailPage() {
             Back to Tests
           </button>
           <button
-            onClick={() => { setAnswers({}); setCurrentQ(0); setTimeLeft(test.timeLimit * 60); setState('intro'); }}
+            onClick={() => router.push('/dashboard/results')}
             className="flex-1 py-3 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold hover:shadow-lg transition-all"
           >
-            Retake Test
+            View All Results
           </button>
         </div>
       </motion.div>
