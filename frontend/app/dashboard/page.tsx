@@ -430,33 +430,42 @@ export default function DashboardPage() {
           transition={{ delay: 0.55 }}
           className={`p-5 rounded-2xl border ${card}`}
         >
-          <h3 className="font-bold mb-4 flex items-center gap-2">
-            <Bell size={16} className="text-amber-400" /> Announcements
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold flex items-center gap-2">
+              <Bell size={16} className="text-amber-400" /> Announcements
+            </h3>
+            <Link href="/dashboard/announcements" className="text-sm text-violet-400 hover:text-violet-300 flex items-center gap-1">
+              View all <ArrowRight size={14} />
+            </Link>
+          </div>
           {announcements.length === 0 ? (
             <p className="text-slate-500 text-sm text-center py-6">No announcements</p>
           ) : (
             <div className="space-y-3">
               {announcements.map((ann, i) => (
-                <motion.div
-                  key={ann._id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: i * 0.08 }}
-                  className={`p-3 rounded-xl border ${isDark ? 'bg-slate-700/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}
-                >
-                  <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold mb-1.5 capitalize
-                    ${ann.type === 'urgent' ? 'bg-red-500/20 text-red-400' :
-                      ann.type === 'test'   ? 'bg-amber-500/20 text-amber-400' :
-                      ann.type === 'result' ? 'bg-green-500/20 text-green-400' :
-                      'bg-violet-500/20 text-violet-400'}`}>
-                    {ann.type}
-                  </div>
-                  <p className="font-semibold text-sm">{ann.title}</p>
-                  <p className={`text-xs mt-0.5 line-clamp-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                    {ann.content}
-                  </p>
-                </motion.div>
+                <Link href="/dashboard/announcements" key={ann._id}>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: i * 0.08 }}
+                    className={`p-3 rounded-xl border cursor-pointer transition-all hover:scale-[1.01]
+                      ${isDark ? 'bg-slate-700/50 border-slate-700 hover:border-amber-500/40 hover:bg-amber-500/5'
+                               : 'bg-slate-50 border-slate-200 hover:border-amber-400/40 hover:bg-amber-50/50'}`}
+                  >
+                    <div className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold mb-1.5 capitalize
+                      ${ann.type === 'urgent' ? 'bg-red-500/20 text-red-400' :
+                        ann.type === 'test'   ? 'bg-amber-500/20 text-amber-400' :
+                        ann.type === 'result' ? 'bg-green-500/20 text-green-400' :
+                        'bg-violet-500/20 text-violet-400'}`}>
+                      {ann.type || 'General'}
+                    </div>
+                    <p className="font-semibold text-sm">{ann.title}</p>
+                    <p className={`text-xs mt-0.5 line-clamp-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                      {ann.content}
+                    </p>
+                    <p className="text-xs text-amber-500/70 mt-1.5 font-medium">Tap to read more →</p>
+                  </motion.div>
+                </Link>
               ))}
             </div>
           )}
