@@ -159,16 +159,18 @@ exports.setupAdmin = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Admin already exists' });
     }
 
-    const admin = await Admin.create({
-      fullName: 'Admin',
-      email: 'hn878283@gmail.com',
-      password: 'admin123'
-    });
+    const { fullName, email, password } = req.body;
+
+    if (!fullName || !email || !password) {
+      return res.status(400).json({ success: false, message: 'fullName, email and password are required' });
+    }
+
+    const admin = await Admin.create({ fullName, email, password });
 
     res.status(201).json({
       success: true,
       message: 'Admin created successfully',
-      credentials: { email: 'hn878283@gmail.com', password: 'admin123' }
+      credentials: { email: admin.email }
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
