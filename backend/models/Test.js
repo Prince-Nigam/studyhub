@@ -28,7 +28,7 @@ const testSchema = new mongoose.Schema({
   chapterId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Chapter',
-    required: true
+    required: false
   },
   subjectId: {
     type: mongoose.Schema.Types.ObjectId,
