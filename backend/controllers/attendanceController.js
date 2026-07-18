@@ -36,8 +36,77 @@ exports.getMyAttendance = async (req, res) => {
   }
 };
 
-// @desc    Mark attendance (Admin)
-// @route   POST /api/attendance/mark
+// @desc    Student marks own attendance (self-present)
+// @route   POST /api/attendance/self-mark
+exports.selfMark = async (req, res) => {
+  try {
+    const { subjectId, classId } = req.body;
+
+    if (!subjectId || !classId) {
+      return res.status(400).json({ success: false, message: 'subjectId and classId are required' });
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Check if already marked today
+    const existing = await Attendance.findOne({
+      userId: req.user._id,
+      subjectId,
+      date: today,
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: 'Attendance already marked for today',
+        data: existing,
+      });
+    }
+
+    const attendance = await Attendance.create({
+      userId: req.user._id,
+      subjectId,
+      classId,
+      date: today,
+      status: 'present',
+      markedBy: req.user._id,
+    });
+
+    // Update user study progress
+    await User.findByIdAndUpdate(req.user._id, {
+      $inc: { 'studyProgress.totalClassesAttended': 1 },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Attendance marked as Present!',
+      data: attendance,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get today's attendance status for student
+// @route   GET /api/attendance/today
+exports.getTodayStatus = async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const records = await Attendance.find({
+      userId: req.user._id,
+      date: today,
+    }).populate('subjectId', 'name color');
+
+    res.json({ success: true, data: records });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
 exports.markAttendance = async (req, res) => {
   try {
     const { userId, subjectId, classId, date, status } = req.body;

@@ -1,13 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import {
   LayoutDashboard, GraduationCap, BookOpen, Video, Brain,
-  Calendar, Users, Bell, Megaphone, Shield, LogOut, FileText, Layers
+  Calendar, Users, Bell, Megaphone, Shield, LogOut, FileText, Layers, RefreshCw
 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { Loader2 } from 'lucide-react';
@@ -32,6 +31,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
   const isDark = theme === 'dark';
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    router.refresh();
+    setTimeout(() => setRefreshing(false), 1000);
+  }, [router]);
 
   useEffect(() => {
     if (!loading && !isAuthenticated && pathname !== '/admin/login') {
@@ -107,9 +113,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <h1 className="font-bold capitalize">
             {pathname.split('/').slice(-1)[0].replace(/-/g, ' ') || 'Dashboard'}
           </h1>
-          <div className="flex items-center gap-2 text-sm text-slate-400">
-            <Shield size={14} className="text-indigo-400" />
-            Admin Mode
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleRefresh}
+              title="Refresh page"
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900'}`}
+              style={{ border: 'none', cursor: 'pointer' }}>
+              <RefreshCw size={15} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }} />
+            </button>
+            <div className="flex items-center gap-2 text-sm text-slate-400">
+              <Shield size={14} className="text-indigo-400" />
+              Admin Mode
+            </div>
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-6">

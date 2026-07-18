@@ -1,23 +1,32 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
-import { Search, Bell, Sun, Moon, Menu, X, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Search, Bell, Sun, Moon, Menu, X, Loader2, RefreshCw } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 
 export default function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const { theme, toggleTheme } = useTheme();
   const { user } = useAuth();
   const isDark = theme === 'dark';
+  const router = useRouter();
 
   const [q, setQ]               = useState('');
   const [results, setResults]   = useState<any>(null);
   const [loading, setLoading]   = useState(false);
   const [open, setOpen]         = useState(false);
   const [unread, setUnread]     = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    router.refresh();
+    setTimeout(() => setRefreshing(false), 1000);
+  }, [router]);
 
   useEffect(() => {
     const fn = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
@@ -105,8 +114,17 @@ export default function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
         </div>
       </div>
 
-      {/* Right: theme + bell + avatar */}
+      {/* Right: refresh + theme + bell + avatar */}
       <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
+
+        {/* Refresh */}
+        <button
+          onClick={handleRefresh}
+          title="Refresh page"
+          style={{ width:36, height:36, borderRadius:9, display:'flex', alignItems:'center', justifyContent:'center', background:btnBg, border:'none', cursor:'pointer' }}>
+          <RefreshCw size={16} color={textSub} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }} />
+        </button>
+
         <button onClick={toggleTheme} style={{ width:36, height:36, borderRadius:9, display:'flex', alignItems:'center', justifyContent:'center', background:btnBg, border:'none', cursor:'pointer', fontSize:16 }}>
           {isDark ? '☀️' : '🌙'}
         </button>
