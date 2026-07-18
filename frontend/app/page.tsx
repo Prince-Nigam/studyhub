@@ -4,9 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import {
   BookOpen, Video, Brain, ArrowRight, Star,
-  ChevronDown, Shield, Search, Menu, X,
+  Shield, Menu, X,
   FileText, BarChart3, GraduationCap, CheckCircle,
-  Play, Users, Award, Zap,
+  Users, Award, Zap, Trophy,
 } from 'lucide-react';
 
 /* ─── Static Data ─────────────────────────────── */
@@ -55,13 +55,21 @@ const REVIEWS = [
 
 export default function LandingPage() {
   const [mobileMenu, setMobileMenu] = useState(false);
-  const [dropdown, setDropdown]     = useState<string|null>(null);
   const [scrolled, setScrolled]     = useState(false);
+  const [leaders, setLeaders]       = useState<any[]>([]);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 8);
     window.addEventListener('scroll', fn, { passive: true });
     return () => window.removeEventListener('scroll', fn);
+  }, []);
+
+  useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+    fetch(`${apiUrl}/users/leaderboard/public`)
+      .then(r => r.json())
+      .then(d => { if (d.success) setLeaders(d.data.slice(0, 3)); })
+      .catch(() => {});
   }, []);
 
   return (
@@ -509,6 +517,109 @@ export default function LandingPage() {
                 </div>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════
+          TOP STUDENTS LEADERBOARD
+      ════════════════════════════════ */}
+      <section style={{ padding:'64px 0', background:'rgba(255,255,255,0.015)', borderTop:'1px solid rgba(255,255,255,.05)', position:'relative', zIndex:1 }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div style={{ textAlign:'center', marginBottom:48 }}>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'6px 14px', borderRadius:99, background:'rgba(255,215,0,0.1)', border:'1px solid rgba(255,215,0,0.2)', marginBottom:16 }}>
+              <Trophy size={13} color="#FFD700"/>
+              <span style={{ fontSize:12, fontWeight:700, color:'#FFD700' }}>HALL OF FAME</span>
+            </div>
+            <h2 style={{ fontSize:'clamp(24px,3.5vw,38px)', fontWeight:900, color:'#fff', marginBottom:12 }}>
+              Top{' '}
+              <span style={{ background:'linear-gradient(135deg,#FFD700,#f97316)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>
+                Students
+              </span>
+            </h2>
+            <p style={{ color:'#64748b', fontSize:15 }}>Ranked by average test score across all subjects</p>
+          </div>
+
+          {leaders.length === 0 ? (
+            <div style={{ textAlign:'center', color:'#334155', padding:'32px 0' }}>
+              <Trophy size={36} color="#1e293b" style={{ margin:'0 auto 12px' }}/>
+              <p style={{ color:'#475569' }}>Be the first to top the leaderboard!</p>
+            </div>
+          ) : (
+            <div style={{ display:'flex', justifyContent:'center', alignItems:'flex-end', gap:16, flexWrap:'wrap' }}>
+              {/* Order: 2nd, 1st, 3rd */}
+              {[leaders[1], leaders[0], leaders[2]].filter(Boolean).map((entry, i) => {
+                const isFirst   = entry.rank === 1;
+                const rankColor = ['#FFD700','#C0C0C0','#CD7F32'][entry.rank - 1];
+                const heights   = [140, 180, 120];
+                const podiumH   = [entry.rank === 2 ? 140 : entry.rank === 3 ? 100 : 0, 180, 100][i];
+                return (
+                  <motion.div key={entry.userId}
+                    initial={{ opacity:0, y:30 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }}
+                    transition={{ delay: i * 0.1 }}
+                    style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:10, width: isFirst ? 200 : 160 }}>
+
+                    {isFirst && <div style={{ fontSize:32 }}>👑</div>}
+
+                    {/* Avatar */}
+                    <div style={{ position:'relative' }}>
+                      {entry.profilePicture ? (
+                        <img src={entry.profilePicture} alt={entry.fullName}
+                          style={{ width: isFirst?80:64, height: isFirst?80:64, borderRadius:'50%', objectFit:'cover', border:`3px solid ${rankColor}` }} />
+                      ) : (
+                        <div style={{
+                          width: isFirst?80:64, height: isFirst?80:64, borderRadius:'50%',
+                          background:'linear-gradient(135deg,#7c3aed,#5b21b6)',
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                          fontWeight:900, color:'#fff', fontSize: isFirst?28:22,
+                          border:`3px solid ${rankColor}`, boxShadow:`0 0 20px ${rankColor}40`
+                        }}>
+                          {entry.fullName?.charAt(0)?.toUpperCase()}
+                        </div>
+                      )}
+                      <div style={{
+                        position:'absolute', bottom:-4, right:-4,
+                        width:22, height:22, borderRadius:'50%', background:rankColor,
+                        display:'flex', alignItems:'center', justifyContent:'center',
+                        fontWeight:900, fontSize:11, color:'#000', border:'2px solid #060714'
+                      }}>{entry.rank}</div>
+                    </div>
+
+                    {/* Name */}
+                    <div style={{ textAlign:'center' }}>
+                      <p style={{ fontWeight:800, color:'#fff', fontSize: isFirst?16:14, marginBottom:2 }}>{entry.fullName}</p>
+                      {entry.selectedClass && <p style={{ fontSize:12, color:'#64748b' }}>Class {entry.selectedClass}</p>}
+                    </div>
+
+                    {/* Podium block */}
+                    <div style={{
+                      width:'100%', borderRadius:'12px 12px 0 0',
+                      background:`linear-gradient(180deg, ${rankColor}20 0%, ${rankColor}08 100%)`,
+                      border:`1px solid ${rankColor}30`, borderBottom:'none',
+                      padding:'16px 12px', textAlign:'center',
+                      minHeight: isFirst ? 110 : entry.rank===2 ? 90 : 70,
+                      display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:4
+                    }}>
+                      <p style={{ fontSize: isFirst?28:22, fontWeight:900, color:rankColor, lineHeight:1 }}>{entry.avgPercentage}%</p>
+                      <p style={{ fontSize:11, color:'#64748b' }}>avg score</p>
+                      <div style={{ display:'flex', gap:8, marginTop:4 }}>
+                        <span style={{ fontSize:11, color:'#94a3b8' }}>🏆 Best: {entry.bestScore}%</span>
+                      </div>
+                      <span style={{ fontSize:11, color:'#475569' }}>{entry.totalTests} tests</span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+
+          <div style={{ textAlign:'center', marginTop:32 }}>
+            <Link href="/signup">
+              <motion.button whileHover={{ scale:1.03 }} whileTap={{ scale:.97 }}
+                style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'12px 28px', borderRadius:12, background:'rgba(255,215,0,0.1)', border:'1px solid rgba(255,215,0,0.25)', color:'#FFD700', fontWeight:700, fontSize:14, cursor:'pointer' }}>
+                <Trophy size={16}/> Join & Compete
+              </motion.button>
+            </Link>
           </div>
         </div>
       </section>

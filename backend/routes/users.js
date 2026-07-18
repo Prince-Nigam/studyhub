@@ -4,6 +4,7 @@ const { getAllUsers, getUser, updateProfile, changePassword, blockUser, deleteUs
 const { protect, adminOnly } = require('../middleware/auth');
 const upload = require('../utils/multer');
 
+router.get('/leaderboard/public', getGlobalLeaderboard); // public - no auth needed
 router.get('/leaderboard', protect, getGlobalLeaderboard);
 router.get('/dashboard-stats', protect, getDashboardStats);
 router.put('/profile', protect, upload.single('profilePicture'), updateProfile);
