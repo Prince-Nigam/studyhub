@@ -125,37 +125,92 @@ export default function SubjectDetailPage() {
                   <BookOpen size={48} className="text-slate-600 mx-auto mb-3" />
                   <p className="text-slate-500">No chapters added yet</p>
                 </div>
-              ) : chapters.map((ch, i) => (
+              ) : chapters.map((ch, i) => {
+                // Count notes/videos for this chapter
+                const chNotes  = notes.filter((n: any) => n.chapterId?._id === ch._id || n.chapterId === ch._id);
+                const chVideos = videos.filter((v: any) => v.chapterId?._id === ch._id || v.chapterId === ch._id);
+                return (
                 <motion.div
                   key={ch._id}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className={`flex items-center gap-4 p-4 rounded-2xl border ${card} card-hover`}
+                  className={`rounded-2xl border ${card} overflow-hidden`}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center text-violet-400 font-black">
-                    {ch.chapterNumber || i + 1}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-bold">{ch.name}</p>
-                    {ch.description && (
-                      <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'} mt-0.5`}>{ch.description}</p>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <Link href={`/dashboard/notes?chapterId=${ch._id}`}>
-                      <span className={`text-xs px-2 py-1 rounded-lg ${isDark ? 'bg-slate-700 text-slate-400 hover:bg-violet-500/20 hover:text-violet-400' : 'bg-slate-100 text-slate-600 hover:bg-violet-50 hover:text-violet-600'} transition-colors cursor-pointer`}>
-                        Notes
+                  {/* Chapter header — click to expand */}
+                  <div className={`flex items-center gap-4 p-4 cursor-pointer`}
+                    onClick={() => setActiveTab('notes')}>
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-purple-500/20 flex items-center justify-center text-violet-400 font-black flex-shrink-0">
+                      {ch.chapterNumber || i + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold">{ch.name}</p>
+                      {ch.description && (
+                        <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'} mt-0.5`}>{ch.description}</p>
+                      )}
+                    </div>
+                    {/* Counts */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className={`text-xs px-2 py-1 rounded-lg font-semibold ${chNotes.length > 0 ? 'bg-violet-500/20 text-violet-400' : isDark?'bg-slate-700 text-slate-500':'bg-slate-100 text-slate-400'}`}>
+                        📄 {chNotes.length} Notes
                       </span>
-                    </Link>
-                    <Link href={`/dashboard/videos?chapterId=${ch._id}`}>
-                      <span className={`text-xs px-2 py-1 rounded-lg ${isDark ? 'bg-slate-700 text-slate-400 hover:bg-blue-500/20 hover:text-blue-400' : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600'} transition-colors cursor-pointer`}>
-                        Videos
+                      <span className={`text-xs px-2 py-1 rounded-lg font-semibold ${chVideos.length > 0 ? 'bg-blue-500/20 text-blue-400' : isDark?'bg-slate-700 text-slate-500':'bg-slate-100 text-slate-400'}`}>
+                        🎬 {chVideos.length} Videos
                       </span>
-                    </Link>
+                    </div>
+                    <ChevronRight size={16} className="text-slate-500 flex-shrink-0" />
                   </div>
+
+                  {/* Chapter notes preview */}
+                  {chNotes.length > 0 && (
+                    <div className={`border-t ${isDark?'border-slate-700':'border-slate-100'} px-4 py-3`}>
+                      <p className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">Notes</p>
+                      <div className="space-y-2">
+                        {chNotes.map((note: any) => (
+                          <Link key={note._id} href={`/dashboard/notes/${note._id}`}>
+                            <div className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-all ${isDark?'hover:bg-white/5':'hover:bg-violet-50'}`}>
+                              <span className="text-lg flex-shrink-0">
+                                {note.type==='pdf'?'📄':note.type==='docx'?'📝':note.type==='ppt'?'📊':'✍️'}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold truncate">{note.title}</p>
+                                <p className="text-xs text-slate-500">{note.type?.toUpperCase()}</p>
+                              </div>
+                              <ChevronRight size={14} className="text-slate-400 flex-shrink-0" />
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Chapter videos preview */}
+                  {chVideos.length > 0 && (
+                    <div className={`border-t ${isDark?'border-slate-700':'border-slate-100'} px-4 py-3`}>
+                      <p className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide">Videos</p>
+                      <div className="space-y-2">
+                        {chVideos.map((video: any) => (
+                          <Link key={video._id} href={`/dashboard/videos/${video._id}`}>
+                            <div className={`flex items-center gap-3 p-2.5 rounded-xl cursor-pointer transition-all ${isDark?'hover:bg-white/5':'hover:bg-blue-50'}`}>
+                              <span className="text-lg flex-shrink-0">🎬</span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold truncate">{video.title}</p>
+                              </div>
+                              <ChevronRight size={14} className="text-slate-400 flex-shrink-0" />
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {chNotes.length === 0 && chVideos.length === 0 && (
+                    <div className={`border-t ${isDark?'border-slate-700':'border-slate-100'} px-4 py-3`}>
+                      <p className="text-xs text-slate-500 text-center">No content added yet</p>
+                    </div>
+                  )}
                 </motion.div>
-              ))}
+              );})}
             </div>
           )}
 
