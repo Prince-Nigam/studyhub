@@ -63,6 +63,17 @@ exports.submitTest = async (req, res) => {
 
     if (!test) return res.status(404).json({ success: false, message: 'Test not found' });
 
+    // Check max attempts
+    if (test.maxAttempts > 0) {
+      const prevAttempts = await TestResult.countDocuments({ testId: test._id, userId: req.user._id });
+      if (prevAttempts >= test.maxAttempts) {
+        return res.status(400).json({
+          success: false,
+          message: `You have already attempted this test ${prevAttempts} time(s). Maximum allowed: ${test.maxAttempts}`
+        });
+      }
+    }
+
     let score = 0;
     let correctAnswers = 0;
     let wrongAnswers = 0;

@@ -48,6 +48,7 @@ const testSchema = new mongoose.Schema({
   isPublished: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
   attempts: { type: Number, default: 0 },
+  maxAttempts: { type: Number, default: 1 }, // 0 = unlimited
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Admin'
