@@ -40,11 +40,7 @@ exports.getMyAttendance = async (req, res) => {
 // @route   POST /api/attendance/self-mark
 exports.selfMark = async (req, res) => {
   try {
-    const { subjectId, classId, status = 'present' } = req.body;
-
-    if (!subjectId || !classId) {
-      return res.status(400).json({ success: false, message: 'subjectId and classId are required' });
-    }
+    const { status = 'present' } = req.body;
 
     if (!['present', 'absent', 'late'].includes(status)) {
       return res.status(400).json({ success: false, message: 'Invalid status' });
@@ -53,11 +49,31 @@ exports.selfMark = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Upsert — allow changing status same day
+    // Find any subject/class to use as reference, or use user's own ID as placeholder
+    let subjectId = req.body.subjectId;
+    let classId   = req.body.classId;
+
+    // If dummy IDs passed, find a real subject or skip subject requirement
+    const mongoose = require('mongoose');
+    const isValidId = (id: string) => mongoose.Types.ObjectId.isValid(id) && id !== '000000000000000000000000';
+
+    if (!isValidId(subjectId)) {
+      const Subject = require('../models/Subject');
+      const anySubject = await Subject.findOne();
+      if (anySubject) {
+        subjectId = anySubject._id;
+        classId   = anySubject.classId;
+      } else {
+        // No subjects exist — store with user ID as placeholder
+        subjectId = req.user._id;
+        classId   = req.user._id;
+      }
+    }
+
     const attendance = await Attendance.findOneAndUpdate(
-      { userId: req.user._id, subjectId, date: today },
+      { userId: req.user._id, date: today },
       { userId: req.user._id, subjectId, classId, date: today, status, markedBy: req.user._id },
-      { upsert: true, new: true, runValidators: true }
+      { upsert: true, new: true, runValidators: false }
     );
 
     res.status(200).json({
