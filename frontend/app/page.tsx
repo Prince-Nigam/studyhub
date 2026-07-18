@@ -65,13 +65,31 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#07081A] text-white" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="min-h-screen text-white" style={{ fontFamily: 'Inter, sans-serif', background: '#060714', position: 'relative', overflowX: 'hidden' }}>
+
+      {/* ── Global background layer ── */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+        {/* Deep base gradient */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124,58,237,0.18) 0%, transparent 70%)' }} />
+        {/* Subtle dot grid */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          backgroundImage: 'radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
+          maskImage: 'radial-gradient(ellipse 100% 100% at 50% 0%, black 30%, transparent 80%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 100% 100% at 50% 0%, black 30%, transparent 80%)',
+        }} />
+        {/* Side ambient glows */}
+        <div style={{ position: 'absolute', top: '10%', left: '-10%', width: 500, height: 500, borderRadius: '50%', background: 'rgba(124,58,237,0.07)', filter: 'blur(120px)' }} />
+        <div style={{ position: 'absolute', top: '30%', right: '-10%', width: 400, height: 400, borderRadius: '50%', background: 'rgba(236,72,153,0.06)', filter: 'blur(100px)' }} />
+        <div style={{ position: 'absolute', bottom: '10%', left: '30%', width: 350, height: 350, borderRadius: '50%', background: 'rgba(8,145,178,0.05)', filter: 'blur(100px)' }} />
+      </div>
 
       {/* ════════════════════════════════
           NAVBAR  (fixed, two rows)
       ════════════════════════════════ */}
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-shadow duration-200 ${scrolled ? 'shadow-2xl shadow-black/40' : ''}`}
-        style={{ background: '#0D0E28' }}>
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'shadow-2xl shadow-black/60 backdrop-blur-xl' : ''}`}
+        style={{ background: scrolled ? 'rgba(6,7,20,0.85)' : '#060714', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
 
         {/* Row 1 — main */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ height: 64, display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -140,10 +158,10 @@ export default function LandingPage() {
           HERO — proper two-column layout
           top padding = navbar height (104px)
       ════════════════════════════════ */}
-      <section style={{ paddingTop: 120, paddingBottom: 80, position:'relative', overflow:'hidden' }}>
+      <section style={{ paddingTop: 120, paddingBottom: 80, position:'relative', overflow:'hidden', zIndex: 1 }}>
         {/* bg glow */}
-        <div style={{ position:'absolute',top:'-80px',left:'-80px',width:500,height:500,borderRadius:'50%',background:'rgba(124,58,237,.12)',filter:'blur(120px)',pointerEvents:'none' }}/>
-        <div style={{ position:'absolute',bottom:0,right:'-60px',width:400,height:400,borderRadius:'50%',background:'rgba(236,72,153,.08)',filter:'blur(100px)',pointerEvents:'none' }}/>
+        <div style={{ position:'absolute',top:'-80px',left:'-80px',width:500,height:500,borderRadius:'50%',background:'rgba(124,58,237,.10)',filter:'blur(120px)',pointerEvents:'none'}}/>
+        <div style={{ position:'absolute',bottom:0,right:'-60px',width:400,height:400,borderRadius:'50%',background:'rgba(236,72,153,.07)',filter:'blur(100px)',pointerEvents:'none'}}/>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div style={{ display:'grid',gridTemplateColumns:'1fr',gap:48,alignItems:'center' }} className="lg:grid-cols-2-custom">
@@ -281,7 +299,7 @@ export default function LandingPage() {
       {/* ════════════════════════════════
           STATS STRIP
       ════════════════════════════════ */}
-      <div style={{ borderTop:'1px solid rgba(255,255,255,.06)',borderBottom:'1px solid rgba(255,255,255,.06)',background:'#0D0E28' }}>
+      <div style={{ borderTop:'1px solid rgba(255,255,255,.06)',borderBottom:'1px solid rgba(255,255,255,.06)',background:'rgba(255,255,255,0.02)',backdropFilter:'blur(10px)',position:'relative',zIndex:1 }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div style={{ display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:0 }} className="sm:grid-cols-4-custom">
             {STATS.map((s,i) => (
@@ -303,10 +321,10 @@ export default function LandingPage() {
       {/* ════════════════════════════════
           CLASSES GRID — properly contained
       ════════════════════════════════ */}
-      <section style={{ padding:'64px 0' }}>
+      <section style={{ padding:'64px 0', position:'relative', zIndex:1 }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          {/* Section header */}
+
           <div style={{ display:'flex',alignItems:'flex-end',justifyContent:'space-between',marginBottom:40,flexWrap:'wrap',gap:12 }}>
             <div>
               <p style={{ fontSize:11,fontWeight:700,color:'#a78bfa',textTransform:'uppercase',letterSpacing:'.1em',marginBottom:8 }}>Browse by Class</p>
@@ -335,7 +353,8 @@ export default function LandingPage() {
                     padding:'16px 14px',
                     borderRadius:16,
                     border:'1px solid rgba(255,255,255,.07)',
-                    background:'#0D0E28',
+                    background:'rgba(255,255,255,0.03)',
+                    backdropFilter:'blur(8px)',
                     cursor:'pointer',
                     transition:'all .25s',
                     overflow:'hidden',
@@ -385,7 +404,7 @@ export default function LandingPage() {
       {/* ════════════════════════════════
           FEATURES — horizontal list style
       ════════════════════════════════ */}
-      <section style={{ padding:'64px 0',background:'#0D0E28',borderTop:'1px solid rgba(255,255,255,.05)',borderBottom:'1px solid rgba(255,255,255,.05)' }}>
+      <section style={{ padding:'64px 0', background:'rgba(255,255,255,0.015)', borderTop:'1px solid rgba(255,255,255,.05)', borderBottom:'1px solid rgba(255,255,255,.05)', position:'relative', zIndex:1 }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div style={{ textAlign:'center',marginBottom:48 }}>
             <p style={{ fontSize:11,fontWeight:700,color:'#a78bfa',textTransform:'uppercase',letterSpacing:'.1em',marginBottom:10 }}>Why StudyPlatform</p>
@@ -429,7 +448,7 @@ export default function LandingPage() {
       {/* ════════════════════════════════
           REVIEWS
       ════════════════════════════════ */}
-      <section style={{ padding:'64px 0' }}>
+      <section style={{ padding:'64px 0', position:'relative', zIndex:1 }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div style={{ textAlign:'center',marginBottom:48 }}>
             <h2 style={{ fontSize:'clamp(24px,3.5vw,38px)',fontWeight:900,color:'#fff' }}>
@@ -460,7 +479,7 @@ export default function LandingPage() {
       {/* ════════════════════════════════
           CTA BANNER
       ════════════════════════════════ */}
-      <section style={{ padding:'0 0 64px' }}>
+      <section style={{ padding:'0 0 64px', position:'relative', zIndex:1 }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity:0,y:20 }} whileInView={{ opacity:1,y:0 }} viewport={{ once:true }}
             style={{ position:'relative',overflow:'hidden',borderRadius:24,padding:'56px 48px',textAlign:'center',background:'linear-gradient(135deg,#4c1d95 0%,#3730a3 50%,#0e7490 100%)' }}>
@@ -499,7 +518,7 @@ export default function LandingPage() {
       {/* ════════════════════════════════
           FOOTER
       ════════════════════════════════ */}
-      <footer style={{ borderTop:'1px solid rgba(255,255,255,.06)',background:'#0D0E28',padding:'32px 0' }}>
+      <footer style={{ borderTop:'1px solid rgba(255,255,255,.06)', background:'rgba(0,0,0,0.3)', backdropFilter:'blur(10px)', padding:'32px 0', position:'relative', zIndex:1 }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div style={{ display:'flex',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:20 }}>
             <div style={{ display:'flex',alignItems:'center',gap:10 }}>
