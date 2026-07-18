@@ -22,9 +22,9 @@ export default function ResultsPage() {
   useEffect(() => {
     const fetch = async () => {
       try {
-        // We'll fetch from dashboard stats
-        const res = await api.get('/users/dashboard-stats');
-        const tr  = res.data.data.testResults || [];
+        // Fetch all test results for this student
+        const res = await api.get('/users/my-results');
+        const tr  = res.data.data || [];
         setResults(tr);
 
         if (tr.length > 0) {

@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import {
   LayoutDashboard, GraduationCap, BookOpen, Video, Brain,
-  Calendar, Users, Bell, Megaphone, Shield, LogOut, FileText, Layers, RefreshCw
+  Calendar, Users, Bell, Megaphone, Shield, LogOut, FileText, Layers, RefreshCw, Trophy
 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { Loader2 } from 'lucide-react';
@@ -19,6 +19,7 @@ const adminNav = [
   { href: '/admin/notes',         icon: FileText,        label: 'Notes' },
   { href: '/admin/videos',        icon: Video,           label: 'Videos' },
   { href: '/admin/tests',         icon: Brain,           label: 'Tests' },
+  { href: '/admin/results',       icon: Trophy,          label: 'Results' },
   { href: '/admin/attendance',    icon: Calendar,        label: 'Attendance' },
   { href: '/admin/users',         icon: Users,           label: 'Users' },
   { href: '/admin/announcements', icon: Megaphone,       label: 'Announcements' },
