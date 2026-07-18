@@ -93,36 +93,34 @@ export default function AttendancePage() {
       </motion.div>
 
       {/* ══ TODAY MARK SECTION ══ */}
-      <div className={`p-6 rounded-2xl border mb-6 ${card}`}>
-        <div className="mb-5">
-          <h3 className="font-bold text-base mb-1">Today</h3>
-          <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-            {now.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' })}
-          </p>
+      <div className={`rounded-2xl border mb-4 ${card}`} style={{ maxWidth:400, padding:'14px 16px' }}>
+
+        {/* Header row */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
+          <div>
+            <p style={{ fontWeight:800, fontSize:13, color: isDark?'#f1f5f9':'#1e293b' }}>Today's Attendance</p>
+            <p style={{ fontSize:11, color:'#64748b' }}>
+              {now.toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short' })}
+            </p>
+          </div>
+          {todayStatus && (
+            <span style={{
+              fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:99,
+              background: todayStatus==='present' ? 'rgba(59,130,246,0.15)' : todayStatus==='late' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.12)',
+              color: todayStatus==='present' ? '#60a5fa' : todayStatus==='late' ? '#fbbf24' : '#f87171',
+              border: `1px solid ${todayStatus==='present' ? 'rgba(59,130,246,0.35)' : todayStatus==='late' ? 'rgba(245,158,11,0.3)' : 'rgba(239,68,68,0.3)'}`,
+            }}>
+              {todayStatus==='present' ? '🔵 Present' : todayStatus==='late' ? '🟡 Late' : '🔴 Absent'}
+            </span>
+          )}
         </div>
 
-        {/* Current status display */}
-        {todayStatus && (
-          <div style={{
-            display:'inline-flex', alignItems:'center', gap:8,
-            padding:'8px 18px', borderRadius:12, marginBottom:20,
-            background: todayStatus==='present' ? 'rgba(59,130,246,0.15)' : todayStatus==='late' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.12)',
-            border: `1.5px solid ${todayStatus==='present' ? 'rgba(59,130,246,0.4)' : todayStatus==='late' ? 'rgba(245,158,11,0.35)' : 'rgba(239,68,68,0.35)'}`,
-          }}>
-            <span style={{ fontSize:16 }}>{todayStatus==='present' ? '🔵' : todayStatus==='late' ? '🟡' : '🔴'}</span>
-            <span style={{ fontWeight:700, fontSize:14, color: todayStatus==='present' ? '#60a5fa' : todayStatus==='late' ? '#fbbf24' : '#f87171' }}>
-              Today: {todayStatus.charAt(0).toUpperCase() + todayStatus.slice(1)}
-            </span>
-            <span style={{ fontSize:12, color:'#475569' }}>(click to change)</span>
-          </div>
-        )}
-
-        {/* Big click buttons */}
-        <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+        {/* 3 compact buttons in a row */}
+        <div style={{ display:'flex', gap:8 }}>
           {[
-            { status:'present' as const, label:'Present', emoji:'✅', color:'#3b82f6', bg:'rgba(59,130,246,0.12)', activeBg:'rgba(59,130,246,0.3)', border:'rgba(59,130,246,0.4)' },
-            { status:'absent'  as const, label:'Absent',  emoji:'❌', color:'#ef4444', bg:'rgba(239,68,68,0.1)',   activeBg:'rgba(239,68,68,0.28)', border:'rgba(239,68,68,0.35)' },
-            { status:'late'    as const, label:'Late',    emoji:'🕐', color:'#f59e0b', bg:'rgba(245,158,11,0.1)', activeBg:'rgba(245,158,11,0.28)', border:'rgba(245,158,11,0.3)' },
+            { status:'present' as const, label:'Present', color:'#3b82f6', bg:'rgba(59,130,246,0.12)', activeBg:'rgba(59,130,246,0.28)' },
+            { status:'absent'  as const, label:'Absent',  color:'#ef4444', bg:'rgba(239,68,68,0.1)',   activeBg:'rgba(239,68,68,0.25)'  },
+            { status:'late'    as const, label:'Late',    color:'#f59e0b', bg:'rgba(245,158,11,0.1)', activeBg:'rgba(245,158,11,0.25)' },
           ].map(btn => {
             const isActive = todayStatus === btn.status;
             const busy     = marking === btn.status;
@@ -130,31 +128,31 @@ export default function AttendancePage() {
               <button key={btn.status} onClick={() => mark(btn.status)}
                 disabled={!!marking}
                 style={{
-                  display:'flex', flexDirection:'column', alignItems:'center', gap:8,
-                  padding:'20px 32px', borderRadius:16, cursor:'pointer', border:'none',
+                  flex:1, padding:'10px 8px', borderRadius:12, cursor:'pointer',
+                  border: `1.5px solid ${isActive ? btn.color+'60' : 'transparent'}`,
                   background: isActive ? btn.activeBg : btn.bg,
-                  outline: `2px solid ${isActive ? btn.border : 'transparent'}`,
-                  transition:'all 0.2s', minWidth:120,
-                  boxShadow: isActive ? `0 4px 20px ${btn.color}30` : 'none',
-                  opacity: marking && !busy ? 0.6 : 1,
-                }}
-                onMouseEnter={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = btn.activeBg; }}
-                onMouseLeave={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = btn.bg; }}>
+                  display:'flex', flexDirection:'column', alignItems:'center', gap:4,
+                  transition:'all 0.15s', outline:'none',
+                  opacity: marking && !busy ? 0.5 : 1,
+                }}>
                 {busy
-                  ? <Loader2 size={28} color={btn.color} style={{ animation:'spin 1s linear infinite' }} />
-                  : <span style={{ fontSize:28 }}>{btn.emoji}</span>
+                  ? <Loader2 size={16} color={btn.color} style={{ animation:'spin 1s linear infinite' }} />
+                  : <span style={{ fontSize:16 }}>
+                      {btn.status==='present' ? '✅' : btn.status==='absent' ? '❌' : '🕐'}
+                    </span>
                 }
-                <span style={{ fontSize:15, fontWeight:800, color:btn.color }}>{btn.label}</span>
-                {isActive && <span style={{ fontSize:10, color:btn.color, opacity:0.8 }}>● Marked</span>}
+                <span style={{ fontSize:11, fontWeight:700, color:btn.color }}>{btn.label}</span>
+                {isActive && <span style={{ fontSize:9, color:btn.color, opacity:0.7 }}>● marked</span>}
               </button>
             );
           })}
         </div>
+      </div>
 
         {/* Per-subject if subjects exist */}
         {subjects.length > 0 && (
-          <div className="mt-5">
-            <p style={{ fontSize:12, fontWeight:700, color:'#475569', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:10 }}>Subject-wise</p>
+          <div className={`rounded-2xl border mb-4 ${card}`} style={{ maxWidth:400, padding:'14px 16px' }}>
+            <p style={{ fontSize:11, fontWeight:700, color:'#475569', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:10 }}>Subject-wise</p>
             <div className="flex flex-col gap-2">
               {subjects.map((sub: any) => {
                 const status  = todayMap[sub._id];
