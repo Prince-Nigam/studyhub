@@ -164,7 +164,7 @@ export default function AttendancePage() {
       )}
 
       {/* Calendar */}
-      <div className={`p-4 rounded-2xl border ${card}`}>
+      <div className={`p-4 rounded-2xl border ${card}`} style={{ maxWidth: 340 }}>
         <div className="flex items-center justify-between mb-3">
           <button onClick={() => { if (month===1){setMonth(12);setYear(y=>y-1);}else setMonth(m=>m-1); }}
             className={`p-1.5 rounded-lg ${isDark?'hover:bg-slate-700':'hover:bg-slate-100'} transition-colors text-sm`}>◀</button>
@@ -183,7 +183,7 @@ export default function AttendancePage() {
             const status = attendanceMap[key];
             const isToday = day===now.getDate() && month===now.getMonth()+1 && year===now.getFullYear();
             return (
-              <div key={day} style={{ aspectRatio:'1', fontSize:11 }} className={`flex items-center justify-center rounded-lg font-medium transition-all
+              <div key={day} style={{ width:32, height:32, fontSize:11 }} className={`flex items-center justify-center rounded-lg font-medium transition-all
                 ${isToday?'ring-1 ring-violet-500':''}
                 ${status==='present'?'bg-blue-500/20 text-blue-400':status==='absent'?'bg-red-500/20 text-red-400':status==='late'?'bg-amber-500/20 text-amber-400':isDark?'text-slate-500':'text-slate-400'}`}>
                 {day}
@@ -191,10 +191,10 @@ export default function AttendancePage() {
             );
           })}
         </div>
-        <div className="flex gap-4 mt-3 pt-3 border-t border-slate-700/40">
-          {[['bg-blue-500/30','Present'],['bg-red-500/30','Absent'],['bg-amber-500/30','Late']].map(([c,l])=>(
-            <div key={l} className="flex items-center gap-1.5 text-xs text-slate-400">
-              <div className={`w-2.5 h-2.5 rounded ${c}`}/>{l}
+        <div className="flex gap-3 mt-3 pt-3 border-t border-slate-700/40">
+          {[['bg-blue-500/30','P'],['bg-red-500/30','A'],['bg-amber-500/30','L']].map(([c,l])=>(
+            <div key={l} className="flex items-center gap-1 text-xs text-slate-400">
+              <div className={`w-2 h-2 rounded ${c}`}/>{l}
             </div>
           ))}
         </div>
