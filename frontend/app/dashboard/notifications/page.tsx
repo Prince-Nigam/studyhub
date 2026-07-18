@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Bell, CheckCheck, Info, CheckCircle, AlertTriangle, Zap, Video, FileText } from 'lucide-react';
+import { Bell, CheckCheck, Info, CheckCircle, AlertTriangle, Zap, Video, FileText, ExternalLink } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
+import { useRouter } from 'next/navigation';
 import api from '@/services/api';
 import toast from 'react-hot-toast';
 
@@ -30,6 +31,7 @@ const typeColors: Record<string, string> = {
 export default function NotificationsPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const router = useRouter();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -64,8 +66,12 @@ export default function NotificationsPage() {
     } catch { }
   };
 
-  const card = isDark ? 'bg-slate-800/60 border-slate-700/50' : 'bg-white border-slate-200 shadow-sm';
+  const handleClick = async (notif: any) => {
+    if (!notif.isRead) await markRead(notif._id);
+    if (notif.link) router.push(notif.link);
+  };
 
+  const card = isDark ? 'bg-slate-800/60 border-slate-700/50' : 'bg-white border-slate-200 shadow-sm';
   return (
     <div className="max-w-3xl mx-auto">
       <motion.div
@@ -117,7 +123,7 @@ export default function NotificationsPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
-                onClick={() => !notif.isRead && markRead(notif._id)}
+                onClick={() => handleClick(notif)}
                 className={`flex items-start gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${card}
                   ${!notif.isRead ? (isDark ? 'border-violet-500/30 bg-violet-500/5' : 'border-violet-200 bg-violet-50/50') : ''}
                   hover:scale-[1.01]`}
@@ -143,6 +149,11 @@ export default function NotificationsPage() {
                       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
                     })}
                   </p>
+                  {notif.link && (
+                    <span style={{ fontSize:11, color:'#a78bfa', display:'inline-flex', alignItems:'center', gap:3, marginTop:4, fontWeight:600 }}>
+                      <ExternalLink size={11}/> Tap to open
+                    </span>
+                  )}
                 </div>
               </motion.div>
             );
