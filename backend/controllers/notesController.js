@@ -1,6 +1,7 @@
 const Note = require('../models/Note');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs');
+const { notifyAll } = require('../utils/notify');
 
 // @desc    Get notes with filters
 // @route   GET /api/notes
@@ -85,6 +86,16 @@ exports.createNote = async (req, res) => {
     }
 
     const note = await Note.create(noteData);
+
+    // Auto-notify all students
+    await notifyAll({
+      title: '📄 New Note Added',
+      message: `A new note "${note.title}" has been added. Check it out!`,
+      type: 'note',
+      link: `/dashboard/notes/${note._id}`,
+      adminId: req.user._id,
+    });
+
     res.status(201).json({ success: true, data: note, message: 'Note created successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

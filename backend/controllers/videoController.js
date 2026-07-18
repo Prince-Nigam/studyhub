@@ -1,4 +1,5 @@
 const Video = require('../models/Video');
+const { notifyAll } = require('../utils/notify');
 
 // Extract YouTube ID from URL
 function extractYoutubeId(url) {
@@ -78,6 +79,16 @@ exports.createVideo = async (req, res) => {
     }
 
     const video = await Video.create(videoData);
+
+    // Auto-notify all students
+    await notifyAll({
+      title: '🎬 New Video Lecture Added',
+      message: `New lecture "${video.title}" is now available. Watch it now!`,
+      type: 'video',
+      link: `/dashboard/videos/${video._id}`,
+      adminId: req.user._id,
+    });
+
     res.status(201).json({ success: true, data: video, message: 'Video added successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

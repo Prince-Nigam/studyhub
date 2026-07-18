@@ -1,6 +1,7 @@
 const Test = require('../models/Test');
 const TestResult = require('../models/TestResult');
 const User = require('../models/User');
+const { notifyAll } = require('../utils/notify');
 
 // @desc    Get all tests
 // @route   GET /api/tests
@@ -171,6 +172,18 @@ exports.getLeaderboard = async (req, res) => {
 exports.createTest = async (req, res) => {
   try {
     const test = await Test.create({ ...req.body, createdBy: req.user._id });
+
+    // Auto-notify if published
+    if (test.isPublished) {
+      await notifyAll({
+        title: '🧠 New MCQ Test Live!',
+        message: `New test "${test.title}" is now available. Attempt it now!`,
+        type: 'test',
+        link: `/dashboard/tests/${test._id}`,
+        adminId: req.user._id,
+      });
+    }
+
     res.status(201).json({ success: true, data: test, message: 'Test created successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

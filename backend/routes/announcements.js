@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Announcement = require('../models/Announcement');
 const { protect, adminOnly } = require('../middleware/auth');
+const { notifyAll } = require('../utils/notify');
 
 router.get('/', protect, async (req, res) => {
   try {
@@ -17,6 +18,16 @@ router.get('/', protect, async (req, res) => {
 router.post('/', adminOnly, async (req, res) => {
   try {
     const announcement = await Announcement.create({ ...req.body, createdBy: req.user._id });
+
+    // Auto-notify all students
+    await notifyAll({
+      title: `📢 ${announcement.title}`,
+      message: announcement.content || announcement.message || 'New announcement posted.',
+      type: 'alert',
+      link: '/dashboard',
+      adminId: req.user._id,
+    });
+
     res.status(201).json({ success: true, data: announcement });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
