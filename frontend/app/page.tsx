@@ -140,35 +140,14 @@ export default function LandingPage() {
                 Get Started <ArrowRight size={14}/>
               </span>
             </Link>
-                <Link href="/admin/login" className="hidden md:block">
-                  <span className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white border border-white/10 hover:border-white/20 transition-all cursor-pointer whitespace-nowrap">
-                    <Shield size={13}/> Admin
-                  </span>
-                </Link>
+
             <button onClick={() => setMobileMenu(v=>!v)} className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/6 transition-all" style={{ border:'none',background:'none',cursor:'pointer' }}>
               {mobileMenu ? <X size={20}/> : <Menu size={20}/>}
             </button>
           </div>
         </div>
 
-        {/* Row 2 — class quick links (desktop only) */}
-        <div className="hidden lg:block border-t border-white/5">
-          <div className="max-w-7xl mx-auto px-8" style={{ height:40,display:'flex',alignItems:'center',gap:4,overflowX:'auto' }}>
-            {[1,2,3,4,5,6,7,8,9,10,11,12].map(n => (
-              <Link key={n} href="/signup">
-                <span style={{ flexShrink:0,padding:'4px 14px',borderRadius:8,fontSize:12,fontWeight:600,color:'#94a3b8',cursor:'pointer',whiteSpace:'nowrap',transition:'all .15s' }}
-                  className="hover:text-white hover:bg-white/6">Class {n}</span>
-              </Link>
-            ))}
-            <span style={{ width:1,height:16,background:'rgba(255,255,255,.1)',flexShrink:0,margin:'0 4px' }}/>
-            {[['MCQ Tests','#c084fc'],['Videos','#f472b6'],['Attendance','#67e8f9']].map(([l,c]) => (
-              <Link key={l} href="/signup">
-                <span style={{ flexShrink:0,padding:'4px 14px',borderRadius:8,fontSize:12,fontWeight:600,color:c,cursor:'pointer',whiteSpace:'nowrap',transition:'all .15s' }}
-                  className="hover:bg-white/6">{l}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
+        {/* Row 2 — class quick links hidden */}
 
         {/* Mobile menu */}
         <AnimatePresence>
