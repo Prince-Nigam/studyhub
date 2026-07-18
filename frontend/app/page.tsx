@@ -83,6 +83,43 @@ export default function LandingPage() {
         <div style={{ position: 'absolute', top: '10%', left: '-10%', width: 500, height: 500, borderRadius: '50%', background: 'rgba(124,58,237,0.07)', filter: 'blur(120px)' }} />
         <div style={{ position: 'absolute', top: '30%', right: '-10%', width: 400, height: 400, borderRadius: '50%', background: 'rgba(236,72,153,0.06)', filter: 'blur(100px)' }} />
         <div style={{ position: 'absolute', bottom: '10%', left: '30%', width: 350, height: 350, borderRadius: '50%', background: 'rgba(8,145,178,0.05)', filter: 'blur(100px)' }} />
+
+        {/* ── Floating study icons ── */}
+        {[
+          { emoji: '📚', x: '5%',  y: '15%', dur: 6,   delay: 0,   size: 28, opacity: 0.18 },
+          { emoji: '✏️', x: '90%', y: '10%', dur: 7,   delay: 1,   size: 24, opacity: 0.15 },
+          { emoji: '🔬', x: '15%', y: '45%', dur: 8,   delay: 2,   size: 26, opacity: 0.13 },
+          { emoji: '📐', x: '80%', y: '40%', dur: 6.5, delay: 0.5, size: 22, opacity: 0.16 },
+          { emoji: '🧮', x: '50%', y: '8%',  dur: 9,   delay: 3,   size: 24, opacity: 0.12 },
+          { emoji: '📝', x: '70%', y: '70%', dur: 7.5, delay: 1.5, size: 26, opacity: 0.14 },
+          { emoji: '🎓', x: '8%',  y: '75%', dur: 8.5, delay: 2.5, size: 30, opacity: 0.13 },
+          { emoji: '💡', x: '35%', y: '85%', dur: 6,   delay: 4,   size: 22, opacity: 0.15 },
+          { emoji: '🧪', x: '92%', y: '65%', dur: 7,   delay: 0.8, size: 24, opacity: 0.12 },
+          { emoji: '📊', x: '25%', y: '20%', dur: 9,   delay: 3.5, size: 20, opacity: 0.14 },
+          { emoji: '⚗️', x: '60%', y: '92%', dur: 7,   delay: 2,   size: 22, opacity: 0.11 },
+          { emoji: '🔭', x: '45%', y: '55%', dur: 10,  delay: 1,   size: 26, opacity: 0.10 },
+        ].map((item, i) => (
+          <div key={i} style={{
+            position: 'absolute',
+            left: item.x,
+            top: item.y,
+            fontSize: item.size,
+            opacity: item.opacity,
+            animation: `floatIcon ${item.dur}s ease-in-out ${item.delay}s infinite`,
+            willChange: 'transform',
+          }}>
+            {item.emoji}
+          </div>
+        ))}
+
+        <style>{`
+          @keyframes floatIcon {
+            0%   { transform: translateY(0px) rotate(0deg); }
+            33%  { transform: translateY(-18px) rotate(4deg); }
+            66%  { transform: translateY(-8px) rotate(-3deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+          }
+        `}</style>
       </div>
 
       {/* ════════════════════════════════
