@@ -94,6 +94,10 @@ export default function TestDetailPage() {
   // Intro screen
   if (state === 'intro') return (
     <div className="max-w-2xl mx-auto">
+      <button onClick={() => router.push('/dashboard/tests')}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:10, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:13, cursor:'pointer', marginBottom:16 }}>
+        ← Back to Tests
+      </button>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
