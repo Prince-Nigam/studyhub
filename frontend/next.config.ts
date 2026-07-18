@@ -7,8 +7,11 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
+
+  experimental: {
+    turbo: {
+      root: './frontend',
+    },
   },
 
   images: {
