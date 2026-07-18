@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Bell, Send, Loader2, X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -8,6 +9,7 @@ import api from '@/services/api';
 import toast from 'react-hot-toast';
 
 export default function AdminNotificationsPage() {
+  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [form, setForm] = useState({ title: '', message: '', type: 'info', isGlobal: true });
@@ -29,6 +31,10 @@ export default function AdminNotificationsPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      <button onClick={() => router.push('/admin/dashboard')}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:12 }}>
+        ← Dashboard
+      </button>
       <h1 className="text-2xl font-black mb-6">Send Notifications</h1>
 
       <div className={`p-6 rounded-2xl border ${isDark ? 'bg-slate-800/60 border-slate-700/50' : 'bg-white border-slate-200 shadow-sm'}`}>

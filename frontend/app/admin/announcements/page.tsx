@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Megaphone, Plus, Trash2, Edit3, Loader2, X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -17,6 +18,7 @@ const typeColors: Record<string, string> = {
 };
 
 export default function AdminAnnouncementsPage() {
+  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [announcements, setAnnouncements] = useState<any[]>([]);
@@ -62,6 +64,10 @@ export default function AdminAnnouncementsPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      <button onClick={() => router.push('/admin/dashboard')}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:12 }}>
+        ← Dashboard
+      </button>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-black">Announcements</h1>
         <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2.5 bg-indigo-500 text-white rounded-xl font-semibold hover:bg-indigo-600 transition-colors">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FileText, Plus, Trash2, Edit3, Upload, Loader2, X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -25,6 +26,7 @@ const defaultForm: NoteForm = {
 };
 
 export default function AdminNotesPage() {
+  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [notes, setNotes] = useState<any[]>([]);
@@ -109,6 +111,10 @@ export default function AdminNotesPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
+      <button onClick={() => router.push('/admin/dashboard')}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:12 }}>
+        ← Dashboard
+      </button>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black">Manage Notes</h1>

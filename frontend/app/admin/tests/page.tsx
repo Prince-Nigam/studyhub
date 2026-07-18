@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Brain, Plus, Trash2, Edit3, Eye, Loader2, X, CheckCircle } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -10,6 +11,7 @@ import toast from 'react-hot-toast';
 const defaultQuestion = { questionText: '', options: [{ text: '', isCorrect: false }, { text: '', isCorrect: false }, { text: '', isCorrect: false }, { text: '', isCorrect: false }], explanation: '', marks: 1 };
 
 export default function AdminTestsPage() {
+  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [tests, setTests] = useState<any[]>([]);
@@ -88,6 +90,10 @@ export default function AdminTestsPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
+      <button onClick={() => router.push('/admin/dashboard')}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:12 }}>
+        ← Dashboard
+      </button>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black">Manage Tests</h1>

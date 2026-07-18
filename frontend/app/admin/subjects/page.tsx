@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { BookOpen, Plus, Trash2, Loader2, X } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -10,6 +11,7 @@ import toast from 'react-hot-toast';
 const colors = ['#6366f1','#3b82f6','#ec4899','#f59e0b','#10b981','#8b5cf6','#06b6d4','#ef4444'];
 
 export default function AdminSubjectsPage() {
+  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [subjects, setSubjects] = useState<any[]>([]);
@@ -54,6 +56,10 @@ export default function AdminSubjectsPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
+      <button onClick={() => router.push('/admin/dashboard')}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:12 }}>
+        ← Dashboard
+      </button>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-black">Manage Subjects</h1>
         <button onClick={() => setShowModal(true)} className="flex items-center gap-2 px-4 py-2.5 bg-indigo-500 text-white rounded-xl font-semibold hover:bg-indigo-600 transition-colors">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Video, Plus, Trash2, Loader2, X, Link as LinkIcon } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -16,6 +17,7 @@ const defaultForm = {
 };
 
 export default function AdminVideosPage() {
+  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [videos, setVideos] = useState<any[]>([]);
@@ -88,6 +90,10 @@ export default function AdminVideosPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
+      <button onClick={() => router.push('/admin/dashboard')}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:12 }}>
+        ← Dashboard
+      </button>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black">Manage Videos</h1>

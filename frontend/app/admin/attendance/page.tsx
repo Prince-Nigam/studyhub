@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Users, RefreshCw } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import api from '@/services/api';
 
 export default function AdminAttendancePage() {
+  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -96,6 +98,10 @@ export default function AdminAttendancePage() {
 
   return (
     <div className="max-w-5xl mx-auto">
+      <button onClick={() => router.push('/admin/dashboard')}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:12 }}>
+        ← Dashboard
+      </button>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-black">Attendance Report</h1>
         <button onClick={fetchReport} style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 16px', borderRadius:10, background:'rgba(99,102,241,0.15)', border:'1px solid rgba(99,102,241,0.3)', color:'#818cf8', fontWeight:600, fontSize:13, cursor:'pointer' }}>

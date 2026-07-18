@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Users, Search, Trash2, Ban, CheckCircle, Eye, Loader2 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -8,6 +9,7 @@ import api from '@/services/api';
 import toast from 'react-hot-toast';
 
 export default function AdminUsersPage() {
+  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [users, setUsers] = useState<any[]>([]);
@@ -49,6 +51,10 @@ export default function AdminUsersPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
+      <button onClick={() => router.push('/admin/dashboard')}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:12 }}>
+        ← Dashboard
+      </button>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-black">Manage Users</h1>
