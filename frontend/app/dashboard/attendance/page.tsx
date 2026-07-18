@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, CheckCircle, XCircle, Clock, TrendingUp, Loader2 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
-import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
 import toast from 'react-hot-toast';
 
@@ -13,7 +12,6 @@ const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov
 
 export default function AttendancePage() {
   const { theme } = useTheme();
-  const { user }  = useAuth();
   const isDark    = theme === 'dark';
 
   const [data,     setData]     = useState<any>(null);
@@ -32,9 +30,7 @@ export default function AttendancePage() {
     Promise.all([
       api.get(`/attendance/my?month=${month}&year=${year}`),
       api.get('/attendance/today'),
-      user?.selectedClass
-        ? api.get(`/subjects?classId=${user.selectedClass}`).catch(() => ({ data: { data: [] } }))
-        : Promise.resolve({ data: { data: [] } }),
+      api.get('/subjects').catch(() => ({ data: { data: [] } })),
     ])
       .then(([att, today, subs]) => {
         setData(att.data);
@@ -43,7 +39,7 @@ export default function AttendancePage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [month, year, user?.selectedClass]);
+  }, [month, year]);
 
   /* ── self mark present ── */
   const markPresent = async (subjectId: string, classId: string) => {
@@ -99,10 +95,11 @@ export default function AttendancePage() {
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(160px, 1fr))', gap:10 }}>
             {subjects.map((sub: any) => {
               const isMarked = markedSubjectIds.has(sub._id);
+              const classId  = sub.classId?._id || sub.classId || '';
               return (
                 <button
                   key={sub._id}
-                  onClick={() => !isMarked && markPresent(sub._id, sub.classId || user?.selectedClass || '')}
+                  onClick={() => !isMarked && markPresent(sub._id, classId)}
                   disabled={isMarked || marking === sub._id}
                   style={{
                     padding:'14px 12px', borderRadius:14, cursor: isMarked ? 'default' : 'pointer',
