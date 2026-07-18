@@ -57,18 +57,36 @@ export default function AdminTestsPage() {
   } : q));
 
   const handleSave = async () => {
-    if (!form.title || !form.classId || !form.subjectId) { toast.error('Fill required fields'); return; }
-    if (questions.some(q => !q.questionText || q.options.every(o => !o.isCorrect))) {
-      toast.error('Each question must have at least one correct answer'); return;
+    if (!form.title) { toast.error('Test title is required'); return; }
+    if (!form.classId) { toast.error('Please select a Class'); return; }
+    if (!form.subjectId) { toast.error('Please select a Subject'); return; }
+    if (questions.length === 0) { toast.error('Add at least one question'); return; }
+    if (questions.some(q => !q.questionText.trim())) {
+      toast.error('All questions must have text'); return;
+    }
+    if (questions.some(q => q.options.every((o: any) => !o.isCorrect))) {
+      toast.error('Each question must have one correct answer marked'); return;
+    }
+    if (questions.some(q => q.options.some((o: any) => !o.text.trim()))) {
+      toast.error('All option fields must be filled'); return;
     }
     setSaving(true);
     try {
-      await api.post('/tests', { ...form, questions });
-      toast.success('Test created!');
+      const payload = {
+        ...form,
+        chapterId: form.chapterId || undefined,
+        questions,
+      };
+      await api.post('/tests', payload);
+      toast.success('Test created successfully!');
       setShowModal(false);
+      setForm({ title: '', description: '', classId: '', subjectId: '', chapterId: '', timeLimit: 30, isPublished: false });
+      setQuestions([{ ...defaultQuestion, options: defaultQuestion.options.map(o => ({ ...o })) }]);
       fetchData();
     } catch (e: any) {
-      toast.error(e.response?.data?.message || 'Failed to create test');
+      const msg = e.response?.data?.message || 'Failed to create test';
+      toast.error(msg);
+      console.error('Test create error:', e.response?.data);
     } finally { setSaving(false); }
   };
 
