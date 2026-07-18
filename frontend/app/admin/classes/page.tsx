@@ -18,7 +18,7 @@ export default function AdminClassesPage() {
   const [showSubModal, setShowSubModal] = useState(false);
   const [seeding,    setSeeding]    = useState(false);
   const [form,       setForm]       = useState({ name: '', description: '', grade: 1 });
-  const [subForm,    setSubForm]    = useState({ name: '', classId: '', description: '', color: '#6366f1' });
+  const [subForm,    setSubForm]    = useState({ name: '', classId: '', description: '', color: '#6366f1', icon: '' });
   const [subjects,   setSubjects]   = useState<any[]>([]);
   const [selClass,   setSelClass]   = useState<any>(null);
   const [saving,     setSaving]     = useState(false);
@@ -72,7 +72,7 @@ export default function AdminClassesPage() {
     try {
       const res = await api.post('/subjects', subForm);
       setSubjects(prev => [...prev, res.data.data]);
-      setSubForm(f => ({ ...f, name: '', description: '' }));
+      setSubForm(f => ({ ...f, name: '', description: '', icon: '' }));
       toast.success('Subject added!');
     } catch (e: any) {
       toast.error(e.response?.data?.message || 'Failed');
@@ -197,7 +197,9 @@ export default function AdminClassesPage() {
                   placeholder="Subject name (e.g. Mathematics) *" className={input}
                   onKeyDown={e => e.key === 'Enter' && handleAddSubject()} />
                 <input value={subForm.description} onChange={e => setSubForm(f => ({ ...f, description: e.target.value }))}
-                  placeholder="Description (optional)" className={input} />
+                  placeholder="Description (e.g. Numbers, Algebra, Geometry)" className={input} />
+                <input value={(subForm as any).icon || ''} onChange={e => setSubForm(f => ({ ...f, icon: e.target.value }))}
+                  placeholder="Emoji icon (e.g. ➕ 🔬 📖 🌍 💻 🧪)" className={input} />
                 <div>
                   <p className="text-xs font-bold mb-2 text-slate-400">Color</p>
                   <div className="flex gap-2 flex-wrap">
