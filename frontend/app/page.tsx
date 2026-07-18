@@ -88,39 +88,6 @@ export default function LandingPage() {
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center">
-            {[
-              { label:'Class 1–5',  items:['Class 1','Class 2','Class 3','Class 4','Class 5'] },
-              { label:'Class 6–8',  items:['Class 6','Class 7','Class 8'] },
-              { label:'Class 9–10', items:['Class 9','Class 10'] },
-              { label:'Class 11–12',items:['Class 11','Class 12'] },
-            ].map(cat => (
-              <div key={cat.label} className="relative"
-                onMouseEnter={() => setDropdown(cat.label)}
-                onMouseLeave={() => setDropdown(null)}>
-                <button className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-white/6 transition-all"
-                  style={{ border: 'none', background: 'none', cursor: 'pointer' }}>
-                  {cat.label}
-                  <ChevronDown size={13} style={{ transform: dropdown === cat.label ? 'rotate(180deg)' : 'none', transition: '.15s' }}/>
-                </button>
-                <AnimatePresence>
-                  {dropdown === cat.label && (
-                    <motion.div initial={{ opacity:0,y:6 }} animate={{ opacity:1,y:0 }} exit={{ opacity:0,y:6 }} transition={{ duration:.12 }}
-                      style={{ position:'absolute',top:'calc(100% + 4px)',left:0,minWidth:160,background:'#12143E',border:'1px solid rgba(255,255,255,.08)',borderRadius:12,overflow:'hidden',boxShadow:'0 16px 40px rgba(0,0,0,.5)',zIndex:100 }}>
-                      {cat.items.map(cls => (
-                        <Link key={cls} href="/signup">
-                          <div className="flex items-center gap-2.5 px-4 py-2.5 hover:bg-white/6 transition-colors cursor-pointer">
-                            <span style={{ width:26,height:26,borderRadius:8,background:'rgba(124,58,237,.2)',color:'#a78bfa',fontWeight:700,fontSize:12,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>
-                              {cls.replace('Class ','')}
-                            </span>
-                            <span style={{ fontSize:13,color:'#cbd5e1' }}>{cls}</span>
-                          </div>
-                        </Link>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
             <Link href="/dashboard/tests">
               <span className="px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-white/6 transition-all cursor-pointer">MCQ Tests</span>
             </Link>
