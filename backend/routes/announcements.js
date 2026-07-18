@@ -24,7 +24,7 @@ router.post('/', adminOnly, async (req, res) => {
       title: `📢 ${announcement.title}`,
       message: announcement.content || announcement.message || 'New announcement posted.',
       type: 'alert',
-      link: '/dashboard',
+      link: '/dashboard/announcements',
       adminId: req.user._id,
     });
 
