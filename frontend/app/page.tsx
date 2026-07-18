@@ -311,7 +311,7 @@ export default function LandingPage() {
             <div>
               <p style={{ fontSize:11,fontWeight:700,color:'#a78bfa',textTransform:'uppercase',letterSpacing:'.1em',marginBottom:8 }}>Browse by Class</p>
               <h2 style={{ fontSize:'clamp(24px,3.5vw,38px)',fontWeight:900,color:'#fff',lineHeight:1.1 }}>
-                Class 1 to 12 —{' '}
+                Class 10 & 12 —{' '}
                 <span style={{ background:'linear-gradient(135deg,#67e8f9,#818cf8)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text' }}>
                   Fully Covered
                 </span>
