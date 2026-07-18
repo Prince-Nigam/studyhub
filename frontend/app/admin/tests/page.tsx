@@ -22,7 +22,7 @@ export default function AdminTestsPage() {
   const [showModal, setShowModal] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const [form, setForm] = useState({ title: '', description: '', classId: '', subjectId: '', chapterId: '', timeLimit: 30, isPublished: false });
+  const [form, setForm] = useState({ title: '', description: '', classId: '', subjectId: '', chapterId: '', timeLimit: 30, isPublished: false, maxAttempts: 1 });
   const [questions, setQuestions] = useState([{ ...defaultQuestion, options: defaultQuestion.options.map(o => ({ ...o })) }]);
 
   const fetchData = async () => {
@@ -175,10 +175,18 @@ export default function AdminTestsPage() {
                 </select>
                 <input type="number" value={form.timeLimit} onChange={e => setForm(f => ({ ...f, timeLimit: parseInt(e.target.value) }))} placeholder="Time limit (minutes)" className={input} min={5} />
               </div>
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
-                <input type="checkbox" checked={form.isPublished} onChange={e => setForm(f => ({ ...f, isPublished: e.target.checked }))} className="accent-indigo-500" />
-                Publish immediately
-              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 mb-1">Max Attempts (0 = unlimited)</label>
+                  <input type="number" value={form.maxAttempts} onChange={e => setForm(f => ({ ...f, maxAttempts: parseInt(e.target.value) || 0 }))} className={input} min={0} placeholder="1" />
+                </div>
+                <div className="flex items-end pb-1">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input type="checkbox" checked={form.isPublished} onChange={e => setForm(f => ({ ...f, isPublished: e.target.checked }))} className="accent-indigo-500" />
+                    Publish immediately
+                  </label>
+                </div>
+              </div>
             </div>
 
             {/* Questions */}

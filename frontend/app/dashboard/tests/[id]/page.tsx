@@ -25,13 +25,23 @@ export default function TestDetailPage() {
   const [timeTaken, setTimeTaken] = useState(0);
   const [result, setResult] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [prevAttempts, setPrevAttempts] = useState(0);
 
   useEffect(() => {
     const fetchTest = async () => {
       try {
-        const res = await api.get(`/tests/${params.id}`);
-        setTest(res.data.data);
-        setTimeLeft(res.data.data.timeLimit * 60);
+        const [testRes, resultsRes] = await Promise.all([
+          api.get(`/tests/${params.id}`),
+          api.get(`/users/my-results`).catch(() => ({ data: { data: [] } })),
+        ]);
+        setTest(testRes.data.data);
+        setTimeLeft(testRes.data.data.timeLimit * 60);
+
+        // Check previous attempts
+        const prevResults = (resultsRes.data.data || []).filter((r: any) =>
+          (r.testId?._id || r.testId) === params.id
+        );
+        setPrevAttempts(prevResults.length);
       } catch (e: any) {
         toast.error(e.response?.data?.message || 'Test not found');
         router.push('/dashboard/tests');
@@ -132,14 +142,32 @@ export default function TestDetailPage() {
           <p>⏰ Timer starts when you click Start Test</p>
           <p>⚡ Results shown immediately after submission</p>
           <p>📊 Detailed explanation for each answer provided</p>
+          {test.maxAttempts > 0 && (
+            <p>🔁 Attempts allowed: {test.maxAttempts} | Your attempts: {prevAttempts}</p>
+          )}
+          {test.maxAttempts === 0 && <p>🔁 Unlimited attempts allowed</p>}
         </div>
 
-        <button
-          onClick={() => setState('taking')}
-          className="w-full py-4 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-2xl font-black text-lg hover:shadow-xl hover:shadow-violet-500/25 transition-all hover:-translate-y-1"
-        >
-          🚀 Start Test
-        </button>
+        {/* Attempt check */}
+        {test.maxAttempts > 0 && prevAttempts >= test.maxAttempts ? (
+          <div style={{ padding:'16px', borderRadius:14, background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', textAlign:'center', marginBottom:12 }}>
+            <p style={{ color:'#f87171', fontWeight:700, fontSize:15, marginBottom:4 }}>
+              ❌ Maximum attempts reached ({prevAttempts}/{test.maxAttempts})
+            </p>
+            <p style={{ color:'#94a3b8', fontSize:13 }}>You cannot attempt this test again.</p>
+            <button onClick={() => router.push('/dashboard/results')}
+              style={{ marginTop:12, padding:'8px 20px', borderRadius:10, border:'none', background:'rgba(239,68,68,0.2)', color:'#f87171', fontWeight:700, fontSize:13, cursor:'pointer' }}>
+              View My Results →
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setState('taking')}
+            className="w-full py-4 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-2xl font-black text-lg hover:shadow-xl hover:shadow-violet-500/25 transition-all hover:-translate-y-1"
+          >
+            {prevAttempts > 0 ? `🔁 Re-attempt Test (${prevAttempts}/${test.maxAttempts || '∞'} used)` : '🚀 Start Test'}
+          </button>
+        )}
       </motion.div>
     </div>
   );
