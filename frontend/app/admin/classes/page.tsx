@@ -55,11 +55,13 @@ export default function AdminClassesPage() {
 
   const handleSave = async () => {
     if (!form.name) { toast.error('Name required'); return; }
+    if (selClass) return; // already created
     setSaving(true);
     try {
-      await api.post('/classes', form);
-      toast.success('Class created!');
-      setShowModal(false);
+      const res = await api.post('/classes', form);
+      toast.success('Class created! Now add subjects below.');
+      setSelClass(res.data.data);
+      setSubForm(f => ({ ...f, classId: res.data.data._id }));
       fetchClasses();
     } catch (e: any) {
       toast.error(e.response?.data?.message || 'Failed');
@@ -136,26 +138,78 @@ export default function AdminClassesPage() {
         ))}
       </div>
 
-      {/* Add Class Modal */}
+      {/* Add Class Modal - with inline subject management */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-10 bg-black/60 backdrop-blur-sm overflow-y-auto">
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-            className={`w-full max-w-md ${isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl border ${isDark ? 'border-slate-700' : 'border-slate-200'} shadow-2xl p-6`}>
+            className={`w-full max-w-lg ${isDark ? 'bg-slate-800' : 'bg-white'} rounded-2xl border ${isDark ? 'border-slate-700' : 'border-slate-200'} shadow-2xl p-6 mb-10`}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-black">Add New Class</h2>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-white"><X size={20} /></button>
+              <button onClick={() => { setShowModal(false); setForm({ name:'', description:'', grade:1 }); setSubjects([]); setSelClass(null); }} className="text-slate-400 hover:text-white"><X size={20} /></button>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 mb-6">
               <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Class name (e.g. Class 10)" className={input} />
               <input type="number" value={form.grade} onChange={e => setForm(f => ({ ...f, grade: parseInt(e.target.value) }))} placeholder="Grade number (1-12)" min={1} max={12} className={input} />
               <input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Description (optional)" className={input} />
-              <div className="flex gap-3">
-                <button onClick={() => setShowModal(false)} className={`flex-1 py-3 rounded-xl font-semibold ${isDark ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-900'}`}>Cancel</button>
-                <button onClick={handleSave} disabled={saving} className="flex-1 flex items-center justify-center gap-2 py-3 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 disabled:opacity-70">
-                  {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />} Create
-                </button>
-              </div>
+              <button onClick={handleSave} disabled={saving || !!selClass}
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 disabled:opacity-50 transition-colors">
+                {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                {selClass ? `✅ Class "${selClass.name}" Created` : 'Create Class'}
+              </button>
             </div>
+
+            {/* Subject section — shows after class is created */}
+            {selClass && (
+              <div style={{ borderTop:`1px solid ${isDark?'rgba(255,255,255,0.08)':'#e2e8f0'}`, paddingTop:20 }}>
+                <h3 className="font-bold text-sm mb-3 flex items-center gap-2">
+                  <BookOpen size={15} className="text-indigo-400" />
+                  Subjects for {selClass.name}
+                  <span className="text-xs text-slate-500 font-normal">({subjects.length} added)</span>
+                </h3>
+
+                {/* Existing subjects */}
+                {subjects.length > 0 && (
+                  <div className="space-y-2 mb-4">
+                    {subjects.map(sub => (
+                      <div key={sub._id} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 12px', borderRadius:10, background: isDark?'rgba(255,255,255,0.04)':'#f8faff', border:`1px solid ${isDark?'rgba(255,255,255,0.06)':'#e2e8f0'}` }}>
+                        <span style={{ fontSize:16 }}>{sub.icon || '📚'}</span>
+                        <div style={{ width:8, height:8, borderRadius:'50%', background: sub.color||'#6366f1', flexShrink:0 }} />
+                        <span style={{ flex:1, fontSize:13, fontWeight:600, color: isDark?'#f1f5f9':'#1e293b' }}>{sub.name}</span>
+                        <button onClick={() => handleDeleteSubject(sub._id)}
+                          style={{ padding:'4px', borderRadius:6, border:'none', cursor:'pointer', background:'rgba(239,68,68,0.1)', color:'#f87171' }}>
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add subject form */}
+                <div style={{ padding:'12px', borderRadius:12, background: isDark?'rgba(99,102,241,0.08)':'#f0f0ff', border:`1px solid ${isDark?'rgba(99,102,241,0.2)':'#c7d2fe'}` }}>
+                  <p className="text-xs font-bold mb-2 text-indigo-400">+ Add Subject</p>
+                  <div className="space-y-2">
+                    <input value={subForm.name} onChange={e => setSubForm(f => ({ ...f, name: e.target.value }))}
+                      placeholder="Subject name *" className={input}
+                      onKeyDown={e => e.key === 'Enter' && handleAddSubject()} />
+                    <input value={subForm.description} onChange={e => setSubForm(f => ({ ...f, description: e.target.value }))}
+                      placeholder="Description (e.g. Numbers, Algebra)" className={input} />
+                    <input value={subForm.icon} onChange={e => setSubForm(f => ({ ...f, icon: e.target.value }))}
+                      placeholder="Emoji icon (e.g. ➕ 🔬 📖 🌍)" className={input} />
+                    <div className="flex gap-2 flex-wrap">
+                      {COLORS.map(c => (
+                        <button key={c} onClick={() => setSubForm(f => ({ ...f, color: c }))}
+                          className={`w-6 h-6 rounded-full border-2 transition-all ${subForm.color === c ? 'border-white scale-110' : 'border-transparent'}`}
+                          style={{ background: c }} />
+                      ))}
+                    </div>
+                    <button onClick={handleAddSubject} disabled={saving}
+                      className="w-full flex items-center justify-center gap-2 py-2 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 disabled:opacity-70 transition-colors text-sm">
+                      {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Add Subject
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
       )}
