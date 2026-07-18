@@ -128,8 +128,68 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// @desc    Get dashboard stats for user
-// @route   GET /api/users/dashboard-stats
+// @desc    Get global leaderboard (top students by avg test score)
+// @route   GET /api/users/leaderboard
+exports.getGlobalLeaderboard = async (req, res) => {
+  try {
+    const TestResult = require('../models/TestResult');
+
+    // Aggregate: group by user, calculate avg percentage, total tests, best score
+    const leaderboard = await TestResult.aggregate([
+      {
+        $group: {
+          _id: '$userId',
+          avgPercentage: { $avg: '$percentage' },
+          totalTests: { $sum: 1 },
+          bestScore: { $max: '$percentage' },
+          totalScore: { $sum: '$score' },
+          totalMarks: { $sum: '$totalMarks' },
+        }
+      },
+      { $sort: { avgPercentage: -1 } },
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      { $unwind: '$user' },
+      {
+        $project: {
+          _id: 1,
+          avgPercentage: { $round: ['$avgPercentage', 1] },
+          totalTests: 1,
+          bestScore: { $round: ['$bestScore', 1] },
+          totalScore: 1,
+          totalMarks: 1,
+          'user.fullName': 1,
+          'user.profilePicture': 1,
+          'user.selectedClass': 1,
+        }
+      }
+    ]);
+
+    const result = leaderboard.map((item, index) => ({
+      rank: index + 1,
+      userId: item._id,
+      fullName: item.user.fullName,
+      profilePicture: item.user.profilePicture,
+      selectedClass: item.user.selectedClass,
+      avgPercentage: item.avgPercentage,
+      bestScore: item.bestScore,
+      totalTests: item.totalTests,
+    }));
+
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
 exports.getDashboardStats = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);

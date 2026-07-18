@@ -7,22 +7,23 @@ import {
   LayoutDashboard, GraduationCap, FileText, Video,
   Brain, Calendar, Download, User, Settings,
   LogOut, ChevronLeft, ChevronRight, Bell, Trophy,
-  BookOpen,
+  BookOpen, Medal,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const NAV = [
-  { href: '/dashboard',               icon: LayoutDashboard, label: 'Dashboard'  },
-  { href: '/dashboard/classes',       icon: GraduationCap,   label: 'Classes'    },
-  { href: '/dashboard/notes',         icon: FileText,        label: 'Notes'      },
-  { href: '/dashboard/videos',        icon: Video,           label: 'Videos'     },
-  { href: '/dashboard/tests',         icon: Brain,           label: 'MCQ Tests'  },
-  { href: '/dashboard/results',       icon: Trophy,          label: 'Results'    },
-  { href: '/dashboard/attendance',    icon: Calendar,        label: 'Attendance' },
-  { href: '/dashboard/downloads',     icon: Download,        label: 'Downloads'  },
-  { href: '/dashboard/notifications', icon: Bell,            label: 'Alerts'     },
-  { href: '/dashboard/profile',       icon: User,            label: 'Profile'    },
-  { href: '/dashboard/settings',      icon: Settings,        label: 'Settings'   },
+  { href: '/dashboard',               icon: LayoutDashboard, label: 'Dashboard'   },
+  { href: '/dashboard/classes',       icon: GraduationCap,   label: 'Classes'     },
+  { href: '/dashboard/notes',         icon: FileText,        label: 'Notes'       },
+  { href: '/dashboard/videos',        icon: Video,           label: 'Videos'      },
+  { href: '/dashboard/tests',         icon: Brain,           label: 'MCQ Tests'   },
+  { href: '/dashboard/results',       icon: Trophy,          label: 'Results'     },
+  { href: '/dashboard/leaderboard',   icon: Medal,           label: 'Leaderboard' },
+  { href: '/dashboard/attendance',    icon: Calendar,        label: 'Attendance'  },
+  { href: '/dashboard/downloads',     icon: Download,        label: 'Downloads'   },
+  { href: '/dashboard/notifications', icon: Bell,            label: 'Alerts'      },
+  { href: '/dashboard/profile',       icon: User,            label: 'Profile'     },
+  { href: '/dashboard/settings',      icon: Settings,        label: 'Settings'    },
 ];
 
 export default function Sidebar() {

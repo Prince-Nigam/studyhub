@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { getAllUsers, getUser, updateProfile, changePassword, blockUser, deleteUser, getDashboardStats } = require('../controllers/userController');
+const { getAllUsers, getUser, updateProfile, changePassword, blockUser, deleteUser, getDashboardStats, getGlobalLeaderboard } = require('../controllers/userController');
 const { protect, adminOnly } = require('../middleware/auth');
 const upload = require('../utils/multer');
 
+router.get('/leaderboard', protect, getGlobalLeaderboard);
 router.get('/dashboard-stats', protect, getDashboardStats);
 router.put('/profile', protect, upload.single('profilePicture'), updateProfile);
 router.put('/change-password', protect, changePassword);

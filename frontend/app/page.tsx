@@ -277,9 +277,9 @@ export default function LandingPage() {
                   <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between' }}>
                     <div>
                       <p style={{ fontSize:11,color:'#64748b',marginBottom:2 }}>Good Morning 🌅</p>
-                      <p style={{ fontSize:14,fontWeight:700,color:'#fff' }}>Welcome back, Rahul!</p>
+                      <p style={{ fontSize:14,fontWeight:700,color:'#fff' }}>Welcome back, Arjun!</p>
                     </div>
-                    <div style={{ width:36,height:36,borderRadius:'50%',background:'linear-gradient(135deg,#7c3aed,#5b21b6)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,color:'#fff',fontSize:14 }}>R</div>
+                    <div style={{ width:36,height:36,borderRadius:'50%',background:'linear-gradient(135deg,#7c3aed,#5b21b6)',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,color:'#fff',fontSize:14 }}>A</div>
                   </div>
 
                   {/* 4 stat boxes */}
