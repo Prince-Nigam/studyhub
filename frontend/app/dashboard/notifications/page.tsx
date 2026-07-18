@@ -68,7 +68,9 @@ export default function NotificationsPage() {
 
   const handleClick = async (notif: any) => {
     if (!notif.isRead) await markRead(notif._id);
-    if (notif.link) router.push(notif.link);
+    if (notif.link) {
+      router.push(notif.link);
+    }
   };
 
   const card = isDark ? 'bg-slate-800/60 border-slate-700/50' : 'bg-white border-slate-200 shadow-sm';
