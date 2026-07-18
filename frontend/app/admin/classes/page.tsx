@@ -1,27 +1,44 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { GraduationCap, Plus, Trash2, Loader2, X, RefreshCw, BookOpen } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Trash2, Loader2, X, RefreshCw, BookOpen, ChevronDown } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import api from '@/services/api';
 import toast from 'react-hot-toast';
 
 const COLORS = ['#6366f1','#3b82f6','#ec4899','#f59e0b','#10b981','#8b5cf6','#06b6d4','#ef4444'];
 
+const SUBJECT_PRESETS = [
+  'Mathematics','Science','English','Hindi','Social Science','Computer Science',
+  'Physics','Chemistry','Biology','History','Geography','Civics',
+  'Economics','Accounts','Business Studies','Sanskrit','Urdu','EVS',
+  'Political Science','Sociology','Psychology','Physical Education','Art','Music',
+];
+
+const ICONS = [
+  '➕','🔬','📖','🌍','💻','🧪','🏛️','🗺️','💰','📊',
+  '🧬','⚗️','🔭','📐','📏','✏️','🎨','🎵','⚽','🏃',
+  '🧮','📚','🌿','🌊','🦋','🧠','💡','🎭','🗣️','✍️',
+  'IN','EN','HI','MA','SC','GK','CS','PE','AR','MU',
+];
+
 export default function AdminClassesPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [classes,    setClasses]    = useState<any[]>([]);
-  const [loading,    setLoading]    = useState(true);
-  const [showModal,  setShowModal]  = useState(false);
+
+  const [classes,      setClasses]      = useState<any[]>([]);
+  const [loading,      setLoading]      = useState(true);
+  const [showModal,    setShowModal]    = useState(false);
   const [showSubModal, setShowSubModal] = useState(false);
-  const [seeding,    setSeeding]    = useState(false);
-  const [form,       setForm]       = useState({ name: '', description: '', grade: 1 });
-  const [subForm,    setSubForm]    = useState({ name: '', classId: '', description: '', color: '#6366f1', icon: '' });
-  const [subjects,   setSubjects]   = useState<any[]>([]);
-  const [selClass,   setSelClass]   = useState<any>(null);
-  const [saving,     setSaving]     = useState(false);
+  const [seeding,      setSeeding]      = useState(false);
+  const [form,         setForm]         = useState({ name:'', description:'', grade:1 });
+  const [subForm,      setSubForm]      = useState({ name:'', classId:'', description:'', color:'#6366f1', icon:'' });
+  const [subjects,     setSubjects]     = useState<any[]>([]);
+  const [selClass,     setSelClass]     = useState<any>(null);
+  const [saving,       setSaving]       = useState(false);
+  const [showSubDrop,  setShowSubDrop]  = useState(false);
+  const [showIconGrid, setShowIconGrid] = useState(false);
 
   const fetchClasses = async () => {
     try {
@@ -188,13 +205,71 @@ export default function AdminClassesPage() {
                 <div style={{ padding:'12px', borderRadius:12, background: isDark?'rgba(99,102,241,0.08)':'#f0f0ff', border:`1px solid ${isDark?'rgba(99,102,241,0.2)':'#c7d2fe'}` }}>
                   <p className="text-xs font-bold mb-2 text-indigo-400">+ Add Subject</p>
                   <div className="space-y-2">
-                    <input value={subForm.name} onChange={e => setSubForm(f => ({ ...f, name: e.target.value }))}
-                      placeholder="Subject name *" className={input}
-                      onKeyDown={e => e.key === 'Enter' && handleAddSubject()} />
+
+                    {/* Subject name dropdown */}
+                    <div style={{ position:'relative' }}>
+                      <button type="button" onClick={() => { setShowSubDrop(v=>!v); setShowIconGrid(false); }}
+                        style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 14px', borderRadius:10, border:`1px solid ${isDark?'rgba(255,255,255,0.12)':'#e2e8f0'}`, background: isDark?'rgba(255,255,255,0.06)':'#fff', color: subForm.name ? (isDark?'#f1f5f9':'#1e293b') : '#64748b', fontSize:13, cursor:'pointer', fontWeight: subForm.name?600:400 }}>
+                        {subForm.name || 'Select Subject Name'}
+                        <ChevronDown size={14} style={{ transform: showSubDrop?'rotate(180deg)':'none', transition:'.15s' }} />
+                      </button>
+                      <AnimatePresence>
+                        {showSubDrop && (
+                          <motion.div initial={{ opacity:0, y:4 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:4 }}
+                            style={{ position:'absolute', top:'calc(100% + 4px)', left:0, right:0, zIndex:100, borderRadius:12, border:`1px solid ${isDark?'rgba(255,255,255,0.1)':'#e2e8f0'}`, background: isDark?'#1e293b':'#fff', boxShadow:'0 8px 24px rgba(0,0,0,0.3)', maxHeight:200, overflowY:'auto' }}>
+                            {/* Custom input */}
+                            <div style={{ padding:'8px', borderBottom:`1px solid ${isDark?'rgba(255,255,255,0.06)':'#f1f5f9'}` }}>
+                              <input placeholder="Or type custom name..." value={subForm.name}
+                                onChange={e => setSubForm(f=>({...f, name:e.target.value}))}
+                                style={{ width:'100%', padding:'6px 10px', borderRadius:8, border:`1px solid ${isDark?'rgba(255,255,255,0.1)':'#e2e8f0'}`, background: isDark?'rgba(255,255,255,0.06)':'#f8faff', color: isDark?'#f1f5f9':'#1e293b', fontSize:12, outline:'none' }} />
+                            </div>
+                            {SUBJECT_PRESETS.filter(s => !subForm.name || s.toLowerCase().includes(subForm.name.toLowerCase())).map(s => (
+                              <div key={s} onClick={() => { setSubForm(f=>({...f, name:s})); setShowSubDrop(false); }}
+                                style={{ padding:'9px 14px', cursor:'pointer', fontSize:13, color: isDark?'#cbd5e1':'#334155', fontWeight:500 }}
+                                onMouseEnter={e=>(e.currentTarget.style.background=isDark?'rgba(255,255,255,0.06)':'#f1f5f9')}
+                                onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
+                                {s}
+                              </div>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    {/* Description */}
                     <input value={subForm.description} onChange={e => setSubForm(f => ({ ...f, description: e.target.value }))}
                       placeholder="Description (e.g. Numbers, Algebra)" className={input} />
-                    <input value={subForm.icon} onChange={e => setSubForm(f => ({ ...f, icon: e.target.value }))}
-                      placeholder="Emoji icon (e.g. ➕ 🔬 📖 🌍)" className={input} />
+
+                    {/* Icon picker */}
+                    <div style={{ position:'relative' }}>
+                      <button type="button" onClick={() => { setShowIconGrid(v=>!v); setShowSubDrop(false); }}
+                        style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 14px', borderRadius:10, border:`1px solid ${isDark?'rgba(255,255,255,0.12)':'#e2e8f0'}`, background: isDark?'rgba(255,255,255,0.06)':'#fff', color: isDark?'#f1f5f9':'#1e293b', fontSize:13, cursor:'pointer' }}>
+                        <span style={{ display:'flex', alignItems:'center', gap:8 }}>
+                          <span style={{ fontSize:20 }}>{subForm.icon || '📚'}</span>
+                          <span style={{ color:'#64748b', fontSize:12 }}>{subForm.icon ? 'Icon selected' : 'Select Icon'}</span>
+                        </span>
+                        <ChevronDown size={14} style={{ transform: showIconGrid?'rotate(180deg)':'none', transition:'.15s' }} />
+                      </button>
+                      <AnimatePresence>
+                        {showIconGrid && (
+                          <motion.div initial={{ opacity:0, y:4 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:4 }}
+                            style={{ position:'absolute', top:'calc(100% + 4px)', left:0, right:0, zIndex:100, borderRadius:12, border:`1px solid ${isDark?'rgba(255,255,255,0.1)':'#e2e8f0'}`, background: isDark?'#1e293b':'#fff', boxShadow:'0 8px 24px rgba(0,0,0,0.3)', padding:12 }}>
+                            <div style={{ display:'grid', gridTemplateColumns:'repeat(8,1fr)', gap:6 }}>
+                              {ICONS.map(ic => (
+                                <button key={ic} type="button" onClick={() => { setSubForm(f=>({...f, icon:ic})); setShowIconGrid(false); }}
+                                  style={{ padding:'8px 4px', borderRadius:8, border: subForm.icon===ic?'2px solid #6366f1':'1px solid transparent', background: subForm.icon===ic?'rgba(99,102,241,0.15)':'transparent', cursor:'pointer', fontSize:ic.length<=2&&ic!==ic.toUpperCase()?18:12, fontWeight:700, color: isDark?'#94a3b8':'#475569', display:'flex', alignItems:'center', justifyContent:'center' }}
+                                  onMouseEnter={e=>(e.currentTarget.style.background='rgba(99,102,241,0.1)')}
+                                  onMouseLeave={e=>(e.currentTarget.style.background=subForm.icon===ic?'rgba(99,102,241,0.15)':'transparent')}>
+                                  {ic}
+                                </button>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    {/* Color picker */}
                     <div className="flex gap-2 flex-wrap">
                       {COLORS.map(c => (
                         <button key={c} onClick={() => setSubForm(f => ({ ...f, color: c }))}
@@ -202,6 +277,7 @@ export default function AdminClassesPage() {
                           style={{ background: c }} />
                       ))}
                     </div>
+
                     <button onClick={handleAddSubject} disabled={saving}
                       className="w-full flex items-center justify-center gap-2 py-2 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 disabled:opacity-70 transition-colors text-sm">
                       {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} Add Subject
@@ -243,26 +319,77 @@ export default function AdminClassesPage() {
               </div>
             )}
 
-            {/* Add subject form */}
+            {/* Add subject form - subjects modal */}
             <div style={{ padding:'14px', borderRadius:14, background: isDark?'rgba(99,102,241,0.08)':'#f0f0ff', border:`1px solid ${isDark?'rgba(99,102,241,0.2)':'#c7d2fe'}` }}>
               <p className="text-sm font-bold mb-3 text-indigo-400">Add New Subject</p>
               <div className="space-y-3">
-                <input value={subForm.name} onChange={e => setSubForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="Subject name (e.g. Mathematics) *" className={input}
-                  onKeyDown={e => e.key === 'Enter' && handleAddSubject()} />
-                <input value={subForm.description} onChange={e => setSubForm(f => ({ ...f, description: e.target.value }))}
-                  placeholder="Description (e.g. Numbers, Algebra, Geometry)" className={input} />
-                <input value={(subForm as any).icon || ''} onChange={e => setSubForm(f => ({ ...f, icon: e.target.value }))}
-                  placeholder="Emoji icon (e.g. ➕ 🔬 📖 🌍 💻 🧪)" className={input} />
-                <div>
-                  <p className="text-xs font-bold mb-2 text-slate-400">Color</p>
-                  <div className="flex gap-2 flex-wrap">
-                    {COLORS.map(c => (
-                      <button key={c} onClick={() => setSubForm(f => ({ ...f, color: c }))}
-                        className={`w-7 h-7 rounded-full border-2 transition-all ${subForm.color === c ? 'border-white scale-110' : 'border-transparent'}`}
-                        style={{ background: c }} />
-                    ))}
-                  </div>
+
+                {/* Subject dropdown */}
+                <div style={{ position:'relative' }}>
+                  <button type="button" onClick={() => { setShowSubDrop(v=>!v); setShowIconGrid(false); }}
+                    style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 14px', borderRadius:10, border:`1px solid ${isDark?'rgba(255,255,255,0.12)':'#e2e8f0'}`, background:isDark?'rgba(255,255,255,0.06)':'#fff', color:subForm.name?(isDark?'#f1f5f9':'#1e293b'):'#64748b', fontSize:13, cursor:'pointer', fontWeight:subForm.name?600:400 }}>
+                    {subForm.name || 'Select Subject Name'}
+                    <ChevronDown size={14} style={{ transform:showSubDrop?'rotate(180deg)':'none', transition:'.15s' }} />
+                  </button>
+                  <AnimatePresence>
+                    {showSubDrop && (
+                      <motion.div initial={{ opacity:0, y:4 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:4 }}
+                        style={{ position:'absolute', top:'calc(100% + 4px)', left:0, right:0, zIndex:200, borderRadius:12, border:`1px solid ${isDark?'rgba(255,255,255,0.1)':'#e2e8f0'}`, background:isDark?'#1e293b':'#fff', boxShadow:'0 8px 24px rgba(0,0,0,0.4)', maxHeight:180, overflowY:'auto' }}>
+                        <div style={{ padding:'8px', borderBottom:`1px solid ${isDark?'rgba(255,255,255,0.06)':'#f1f5f9'}` }}>
+                          <input placeholder="Or type custom..." value={subForm.name} onChange={e=>setSubForm(f=>({...f,name:e.target.value}))}
+                            style={{ width:'100%', padding:'6px 10px', borderRadius:8, border:`1px solid ${isDark?'rgba(255,255,255,0.1)':'#e2e8f0'}`, background:isDark?'rgba(255,255,255,0.06)':'#f8faff', color:isDark?'#f1f5f9':'#1e293b', fontSize:12, outline:'none' }} />
+                        </div>
+                        {SUBJECT_PRESETS.filter(s=>!subForm.name||s.toLowerCase().includes(subForm.name.toLowerCase())).map(s=>(
+                          <div key={s} onClick={()=>{setSubForm(f=>({...f,name:s}));setShowSubDrop(false);}}
+                            style={{ padding:'9px 14px', cursor:'pointer', fontSize:13, color:isDark?'#cbd5e1':'#334155' }}
+                            onMouseEnter={e=>(e.currentTarget.style.background=isDark?'rgba(255,255,255,0.06)':'#f1f5f9')}
+                            onMouseLeave={e=>(e.currentTarget.style.background='transparent')}>
+                            {s}
+                          </div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <input value={subForm.description} onChange={e=>setSubForm(f=>({...f,description:e.target.value}))}
+                  placeholder="Description (e.g. Numbers, Algebra)" className={input} />
+
+                {/* Icon picker */}
+                <div style={{ position:'relative' }}>
+                  <button type="button" onClick={()=>{setShowIconGrid(v=>!v);setShowSubDrop(false);}}
+                    style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 14px', borderRadius:10, border:`1px solid ${isDark?'rgba(255,255,255,0.12)':'#e2e8f0'}`, background:isDark?'rgba(255,255,255,0.06)':'#fff', color:isDark?'#f1f5f9':'#1e293b', fontSize:13, cursor:'pointer' }}>
+                    <span style={{ display:'flex', alignItems:'center', gap:8 }}>
+                      <span style={{ fontSize:20 }}>{subForm.icon||'📚'}</span>
+                      <span style={{ color:'#64748b', fontSize:12 }}>{subForm.icon?'Icon selected':'Select Icon'}</span>
+                    </span>
+                    <ChevronDown size={14} style={{ transform:showIconGrid?'rotate(180deg)':'none', transition:'.15s' }} />
+                  </button>
+                  <AnimatePresence>
+                    {showIconGrid && (
+                      <motion.div initial={{ opacity:0, y:4 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:4 }}
+                        style={{ position:'absolute', top:'calc(100% + 4px)', left:0, right:0, zIndex:200, borderRadius:12, border:`1px solid ${isDark?'rgba(255,255,255,0.1)':'#e2e8f0'}`, background:isDark?'#1e293b':'#fff', boxShadow:'0 8px 24px rgba(0,0,0,0.4)', padding:12 }}>
+                        <div style={{ display:'grid', gridTemplateColumns:'repeat(8,1fr)', gap:6 }}>
+                          {ICONS.map(ic=>(
+                            <button key={ic} type="button" onClick={()=>{setSubForm(f=>({...f,icon:ic}));setShowIconGrid(false);}}
+                              style={{ padding:'8px 4px', borderRadius:8, border:subForm.icon===ic?'2px solid #6366f1':'1px solid transparent', background:subForm.icon===ic?'rgba(99,102,241,0.15)':'transparent', cursor:'pointer', fontSize:ic.length<=2?18:12, fontWeight:700, color:isDark?'#94a3b8':'#475569', display:'flex', alignItems:'center', justifyContent:'center' }}
+                              onMouseEnter={e=>(e.currentTarget.style.background='rgba(99,102,241,0.1)')}
+                              onMouseLeave={e=>(e.currentTarget.style.background=subForm.icon===ic?'rgba(99,102,241,0.15)':'transparent')}>
+                              {ic}
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <div className="flex gap-2 flex-wrap">
+                  {COLORS.map(c=>(
+                    <button key={c} onClick={()=>setSubForm(f=>({...f,color:c}))}
+                      className={`w-7 h-7 rounded-full border-2 transition-all ${subForm.color===c?'border-white scale-110':'border-transparent'}`}
+                      style={{ background:c }} />
+                  ))}
                 </div>
                 <button onClick={handleAddSubject} disabled={saving}
                   className="w-full flex items-center justify-center gap-2 py-2.5 bg-indigo-500 text-white rounded-xl font-bold hover:bg-indigo-600 disabled:opacity-70 transition-colors">
