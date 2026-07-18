@@ -198,37 +198,38 @@ export default function AttendancePage() {
         )}
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      {/* Stats — compact */}
+      <div className="grid grid-cols-4 gap-3 mb-4">
         {[
           { label:'Present',    value: attData?.stats?.presentCount || 0, color:'#3b82f6', bg:'rgba(59,130,246,0.1)'  },
           { label:'Absent',     value: attData?.stats?.absentCount  || 0, color:'#ef4444', bg:'rgba(239,68,68,0.1)'   },
           { label:'Late',       value: attData?.stats?.lateCount    || 0, color:'#f59e0b', bg:'rgba(245,158,11,0.1)'  },
-          { label:'Percentage', value: `${attData?.stats?.percentage || 0}%`, color:'#a78bfa', bg:'rgba(124,58,237,0.1)' },
+          { label:'%',          value: `${attData?.stats?.percentage || 0}%`, color:'#a78bfa', bg:'rgba(124,58,237,0.1)' },
         ].map((s, i) => (
-          <motion.div key={i} initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay:i*0.08 }}
-            className={`p-5 rounded-2xl border ${card} flex items-center gap-3`}>
-            <div style={{ width:44, height:44, borderRadius:12, background:s.bg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-              <span style={{ fontSize:18, fontWeight:900, color:s.color }}>{loading ? '—' : s.value}</span>
-            </div>
-            <p style={{ fontSize:13, color: isDark?'#94a3b8':'#64748b', fontWeight:600 }}>{s.label}</p>
-          </motion.div>
+          <div key={i} style={{
+            padding:'10px 12px', borderRadius:12,
+            background:s.bg, border:`1px solid ${s.color}25`,
+            display:'flex', alignItems:'center', gap:8,
+          }}>
+            <span style={{ fontSize:16, fontWeight:900, color:s.color }}>{loading ? '—' : s.value}</span>
+            <span style={{ fontSize:11, color:s.color, opacity:0.8, fontWeight:600 }}>{s.label}</span>
+          </div>
         ))}
       </div>
 
-      {/* Calendar */}
-      <div className={`p-6 rounded-2xl border ${card}`}>
-        <div className="flex items-center justify-between mb-5">
+      {/* Calendar — compact */}
+      <div className={`p-4 rounded-2xl border ${card}`} style={{ maxWidth:360 }}>
+        <div className="flex items-center justify-between mb-3">
           <button onClick={() => { if (month===1){setMonth(12);setYear(y=>y-1);}else setMonth(m=>m-1); }}
-            className={`p-2 rounded-xl ${isDark?'hover:bg-slate-700':'hover:bg-slate-100'} transition-colors`}>◀</button>
-          <h3 className="font-bold">{MONTHS[month-1]} {year}</h3>
+            style={{ background:'none', border:'none', cursor:'pointer', padding:'4px 8px', borderRadius:8, color:'#64748b', fontSize:14 }}>◀</button>
+          <h3 style={{ fontWeight:700, fontSize:13 }}>{MONTHS[month-1]} {year}</h3>
           <button onClick={() => { if (month===12){setMonth(1);setYear(y=>y+1);}else setMonth(m=>m+1); }}
-            className={`p-2 rounded-xl ${isDark?'hover:bg-slate-700':'hover:bg-slate-100'} transition-colors`}>▶</button>
+            style={{ background:'none', border:'none', cursor:'pointer', padding:'4px 8px', borderRadius:8, color:'#64748b', fontSize:14 }}>▶</button>
         </div>
-        <div className="grid grid-cols-7 mb-2">
-          {DAYS.map(d => <div key={d} className="text-center text-xs font-bold py-1 text-slate-500">{d}</div>)}
+        <div className="grid grid-cols-7 mb-1">
+          {DAYS.map(d => <div key={d} style={{ textAlign:'center', fontSize:10, fontWeight:700, color:'#475569', padding:'2px 0' }}>{d.slice(0,1)}</div>)}
         </div>
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-0.5">
           {[...Array(firstDay)].map((_,i) => <div key={`e${i}`}/>)}
           {[...Array(daysInMonth)].map((_,i) => {
             const day    = i+1;
@@ -236,21 +237,27 @@ export default function AttendancePage() {
             const status = calMap[key];
             const isToday = day===now.getDate() && month===now.getMonth()+1 && year===now.getFullYear();
             return (
-              <div key={day} className={`aspect-square flex items-center justify-center rounded-xl text-sm font-medium transition-all
-                ${isToday ? 'ring-2 ring-violet-500' : ''}
-                ${status==='present' ? 'bg-blue-500/20 text-blue-400' :
-                  status==='absent'  ? 'bg-red-500/20 text-red-400'   :
-                  status==='late'    ? 'bg-amber-500/20 text-amber-400':
-                  isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+              <div key={day} style={{
+                aspectRatio:'1', display:'flex', alignItems:'center', justifyContent:'center',
+                borderRadius:6, fontSize:11, fontWeight:500,
+                outline: isToday ? '2px solid #7c3aed' : 'none',
+                background: status==='present' ? 'rgba(59,130,246,0.2)' :
+                            status==='absent'  ? 'rgba(239,68,68,0.18)' :
+                            status==='late'    ? 'rgba(245,158,11,0.18)': 'transparent',
+                color:      status==='present' ? '#60a5fa' :
+                            status==='absent'  ? '#f87171' :
+                            status==='late'    ? '#fbbf24' :
+                            isDark ? '#475569' : '#94a3b8',
+              }}>
                 {day}
               </div>
             );
           })}
         </div>
-        <div className="flex gap-5 mt-4 pt-4 border-t border-slate-700/40">
-          {[['bg-blue-500/30','Present'],['bg-red-500/30','Absent'],['bg-amber-500/30','Late']].map(([c,l])=>(
-            <div key={l} className="flex items-center gap-2 text-xs text-slate-400">
-              <div className={`w-3 h-3 rounded ${c}`}/>{l}
+        <div className="flex gap-4 mt-3 pt-3" style={{ borderTop:'1px solid rgba(255,255,255,0.06)' }}>
+          {[['rgba(59,130,246,0.3)','Present'],['rgba(239,68,68,0.25)','Absent'],['rgba(245,158,11,0.25)','Late']].map(([c,l])=>(
+            <div key={l} className="flex items-center gap-1.5" style={{ fontSize:10, color:'#64748b' }}>
+              <div style={{ width:8, height:8, borderRadius:3, background:c }}/>{l}
             </div>
           ))}
         </div>
