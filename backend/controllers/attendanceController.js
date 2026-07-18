@@ -55,7 +55,7 @@ exports.selfMark = async (req, res) => {
 
     // If dummy IDs passed, find a real subject or skip subject requirement
     const mongoose = require('mongoose');
-    const isValidId = (id: string) => mongoose.Types.ObjectId.isValid(id) && id !== '000000000000000000000000';
+    const isValidId = (id) => mongoose.Types.ObjectId.isValid(id) && id !== '000000000000000000000000';
 
     if (!isValidId(subjectId)) {
       const Subject = require('../models/Subject');
