@@ -40,47 +40,29 @@ exports.getMyAttendance = async (req, res) => {
 // @route   POST /api/attendance/self-mark
 exports.selfMark = async (req, res) => {
   try {
-    const { subjectId, classId } = req.body;
+    const { subjectId, classId, status = 'present' } = req.body;
 
     if (!subjectId || !classId) {
       return res.status(400).json({ success: false, message: 'subjectId and classId are required' });
     }
 
+    if (!['present', 'absent', 'late'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid status' });
+    }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Check if already marked today
-    const existing = await Attendance.findOne({
-      userId: req.user._id,
-      subjectId,
-      date: today,
-    });
+    // Upsert — allow changing status same day
+    const attendance = await Attendance.findOneAndUpdate(
+      { userId: req.user._id, subjectId, date: today },
+      { userId: req.user._id, subjectId, classId, date: today, status, markedBy: req.user._id },
+      { upsert: true, new: true, runValidators: true }
+    );
 
-    if (existing) {
-      return res.status(400).json({
-        success: false,
-        message: 'Attendance already marked for today',
-        data: existing,
-      });
-    }
-
-    const attendance = await Attendance.create({
-      userId: req.user._id,
-      subjectId,
-      classId,
-      date: today,
-      status: 'present',
-      markedBy: req.user._id,
-    });
-
-    // Update user study progress
-    await User.findByIdAndUpdate(req.user._id, {
-      $inc: { 'studyProgress.totalClassesAttended': 1 },
-    });
-
-    res.status(201).json({
+    res.status(200).json({
       success: true,
-      message: 'Attendance marked as Present!',
+      message: `Marked as ${status}`,
       data: attendance,
     });
   } catch (error) {
