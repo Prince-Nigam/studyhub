@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Bell, Megaphone, Calendar } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
+import { useRouter } from 'next/navigation';
 import api from '@/services/api';
 
 export default function AnnouncementsPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const router = useRouter();
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,6 +25,10 @@ export default function AnnouncementsPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
+      <button onClick={() => router.back()}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:16 }}>
+        ← Back
+      </button>
       <motion.div initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }} className="mb-6">
         <div className="flex items-center gap-3 mb-1">
           <Megaphone size={24} className="text-amber-400" />

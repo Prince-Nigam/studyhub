@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Trophy, Medal, Star, BookOpen, Target, TrendingUp } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import api from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 
@@ -41,6 +42,7 @@ export default function LeaderboardPage() {
   const [data, setData]     = useState<LeaderEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     api.get('/users/leaderboard')
@@ -54,6 +56,10 @@ export default function LeaderboardPage() {
 
   return (
     <div style={{ padding: '24px', maxWidth: 700, margin: '0 auto' }}>
+      <button onClick={() => router.back()}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:20 }}>
+        ← Back
+      </button>
 
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}

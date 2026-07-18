@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Download, FileText, Search, Filter } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
+import { useRouter } from 'next/navigation';
 import api from '@/services/api';
 import Link from 'next/link';
 
 export default function DownloadsPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const router = useRouter();
   const [notes, setNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -32,6 +34,10 @@ export default function DownloadsPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
+      <button onClick={() => router.back()}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:16 }}>
+        ← Back
+      </button>
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
         <h1 className="text-3xl font-black mb-2">Downloads</h1>
         <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>Download notes, PDFs, assignments and study materials</p>

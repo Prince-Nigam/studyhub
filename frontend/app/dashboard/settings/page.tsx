@@ -4,16 +4,22 @@ import { motion } from 'framer-motion';
 import { Sun, Moon, Bell, Shield, Trash2, LogOut } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function SettingsPage() {
   const { theme, toggleTheme } = useTheme();
   const { logout } = useAuth();
   const isDark = theme === 'dark';
+  const router = useRouter();
   const card = isDark ? 'bg-slate-800/60 border-slate-700/50' : 'bg-white border-slate-200 shadow-sm';
 
   return (
     <div className="max-w-2xl mx-auto">
+      <button onClick={() => router.back()}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:16 }}>
+        ← Back
+      </button>
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
         <h1 className="text-3xl font-black mb-2">Settings</h1>
         <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>Manage your preferences</p>
