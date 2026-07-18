@@ -85,44 +85,41 @@ export default function AttendancePage() {
       </motion.div>
 
       {/* ── Today Mark Section ── */}
-      <div className={`p-6 rounded-2xl border mb-6 ${card}`}>
-        <div className="flex items-center justify-between mb-5">
+      <div className={`p-4 rounded-2xl border mb-4 ${card}`}>
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="font-bold text-base">Today</h3>
-            <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-              {now.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' })}
+            <h3 className="font-bold text-sm">Today</h3>
+            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              {now.toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short' })}
             </p>
           </div>
           {todayStatus && (
             <span style={{
-              padding:'6px 16px', borderRadius:99, fontSize:13, fontWeight:700,
+              padding:'3px 10px', borderRadius:99, fontSize:11, fontWeight:700,
               background: todayStatus==='present' ? 'rgba(59,130,246,0.2)' : todayStatus==='absent' ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
               color: todayStatus==='present' ? '#60a5fa' : todayStatus==='absent' ? '#f87171' : '#fbbf24',
-              border: `1px solid ${todayStatus==='present' ? 'rgba(59,130,246,0.4)' : todayStatus==='absent' ? 'rgba(239,68,68,0.35)' : 'rgba(245,158,11,0.35)'}`,
             }}>
               {todayStatus==='present' ? '🔵 Present' : todayStatus==='absent' ? '🔴 Absent' : '🟡 Late'}
             </span>
           )}
         </div>
 
-        <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+        <div style={{ display:'flex', gap:8 }}>
           {BTN.map(b => (
             <button key={b.status} onClick={() => !marking && mark(b.status)}
               disabled={marking}
               style={{
-                flex:1, minWidth:100, padding:'14px 20px', borderRadius:14,
-                border: `2px solid ${todayStatus===b.status ? b.activeColor+'80' : 'transparent'}`,
+                flex:1, padding:'8px 10px', borderRadius:10,
+                border: `1.5px solid ${todayStatus===b.status ? b.activeColor+'70' : 'transparent'}`,
                 background: todayStatus===b.status ? b.activeBg : b.inactiveBg,
-                color: b.textColor, fontWeight:800, fontSize:15,
+                color: b.textColor, fontWeight:700, fontSize:12,
                 cursor: marking ? 'not-allowed' : 'pointer',
                 transition:'all 0.2s', outline:'none',
-                boxShadow: todayStatus===b.status ? `0 4px 16px ${b.activeColor}30` : 'none',
               }}>
-              {marking ? <Loader2 size={16} style={{ animation:'spin 1s linear infinite', margin:'0 auto' }} /> : b.label}
+              {marking ? '...' : b.label}
             </button>
           ))}
         </div>
-        <p style={{ fontSize:11, color:'#475569', marginTop:10 }}>You can change your status anytime during the day.</p>
       </div>
 
       {/* Stats */}
@@ -167,18 +164,18 @@ export default function AttendancePage() {
       )}
 
       {/* Calendar */}
-      <div className={`p-6 rounded-2xl border ${card}`}>
-        <div className="flex items-center justify-between mb-6">
+      <div className={`p-4 rounded-2xl border ${card}`}>
+        <div className="flex items-center justify-between mb-3">
           <button onClick={() => { if (month===1){setMonth(12);setYear(y=>y-1);}else setMonth(m=>m-1); }}
-            className={`p-2 rounded-xl ${isDark?'hover:bg-slate-700':'hover:bg-slate-100'} transition-colors`}>◀</button>
-          <h3 className="font-bold text-lg">{MONTHS[month-1]} {year}</h3>
+            className={`p-1.5 rounded-lg ${isDark?'hover:bg-slate-700':'hover:bg-slate-100'} transition-colors text-sm`}>◀</button>
+          <h3 className="font-bold text-sm">{MONTHS[month-1]} {year}</h3>
           <button onClick={() => { if (month===12){setMonth(1);setYear(y=>y+1);}else setMonth(m=>m+1); }}
-            className={`p-2 rounded-xl ${isDark?'hover:bg-slate-700':'hover:bg-slate-100'} transition-colors`}>▶</button>
+            className={`p-1.5 rounded-lg ${isDark?'hover:bg-slate-700':'hover:bg-slate-100'} transition-colors text-sm`}>▶</button>
         </div>
-        <div className="grid grid-cols-7 mb-2">
-          {DAYS.map(d => <div key={d} className={`text-center text-xs font-bold py-2 ${isDark?'text-slate-500':'text-slate-400'}`}>{d}</div>)}
+        <div className="grid grid-cols-7 mb-1">
+          {DAYS.map(d => <div key={d} className={`text-center text-xs font-bold py-1 ${isDark?'text-slate-500':'text-slate-400'}`}>{d[0]}</div>)}
         </div>
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-0.5">
           {[...Array(firstDay)].map((_,i) => <div key={`e${i}`}/>)}
           {[...Array(daysInMonth)].map((_,i) => {
             const day    = i+1;
@@ -186,18 +183,18 @@ export default function AttendancePage() {
             const status = attendanceMap[key];
             const isToday = day===now.getDate() && month===now.getMonth()+1 && year===now.getFullYear();
             return (
-              <div key={day} className={`aspect-square flex items-center justify-center rounded-xl text-sm font-medium transition-all
-                ${isToday?'ring-2 ring-violet-500':''}
+              <div key={day} style={{ aspectRatio:'1', fontSize:11 }} className={`flex items-center justify-center rounded-lg font-medium transition-all
+                ${isToday?'ring-1 ring-violet-500':''}
                 ${status==='present'?'bg-blue-500/20 text-blue-400':status==='absent'?'bg-red-500/20 text-red-400':status==='late'?'bg-amber-500/20 text-amber-400':isDark?'text-slate-500':'text-slate-400'}`}>
                 {day}
               </div>
             );
           })}
         </div>
-        <div className="flex gap-5 mt-4 pt-4 border-t border-slate-700/40">
+        <div className="flex gap-4 mt-3 pt-3 border-t border-slate-700/40">
           {[['bg-blue-500/30','Present'],['bg-red-500/30','Absent'],['bg-amber-500/30','Late']].map(([c,l])=>(
-            <div key={l} className="flex items-center gap-2 text-xs text-slate-400">
-              <div className={`w-3 h-3 rounded ${c}`}/>{l}
+            <div key={l} className="flex items-center gap-1.5 text-xs text-slate-400">
+              <div className={`w-2.5 h-2.5 rounded ${c}`}/>{l}
             </div>
           ))}
         </div>
