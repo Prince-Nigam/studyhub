@@ -161,14 +161,14 @@ exports.setupAdmin = async (req, res) => {
 
     const admin = await Admin.create({
       fullName: 'Admin',
-      email: 'hn878283@gmil.com',
+      email: 'hn878283@gmail.com',
       password: 'admin123'
     });
 
     res.status(201).json({
       success: true,
       message: 'Admin created successfully',
-      credentials: { email: 'hn878283@gmil.com', password: 'admin123' }
+      credentials: { email: 'hn878283@gmail.com', password: 'admin123' }
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
