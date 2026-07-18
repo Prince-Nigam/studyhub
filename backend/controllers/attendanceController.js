@@ -42,10 +42,6 @@ exports.selfMark = async (req, res) => {
   try {
     const { subjectId, classId, status = 'present' } = req.body;
 
-    if (!subjectId || !classId) {
-      return res.status(400).json({ success: false, message: 'subjectId and classId are required' });
-    }
-
     if (!['present', 'absent', 'late'].includes(status)) {
       return res.status(400).json({ success: false, message: 'Invalid status' });
     }
@@ -53,18 +49,37 @@ exports.selfMark = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Upsert — allow changing status same day
+    // Use mongoose.Types.ObjectId only if valid
+    const mongoose = require('mongoose');
+    const isValidSub   = subjectId && mongoose.Types.ObjectId.isValid(subjectId);
+    const isValidClass = classId   && mongoose.Types.ObjectId.isValid(classId);
+
+    if (!isValidSub || !isValidClass) {
+      // Try to find first available subject/class
+      const Subject = require('../models/Subject');
+      const Class   = require('../models/Class');
+      const firstSub   = await Subject.findOne().lean();
+      const firstClass = await Class.findOne().lean();
+
+      if (!firstSub || !firstClass) {
+        return res.status(400).json({ success: false, message: 'No subjects/classes configured yet. Please contact admin.' });
+      }
+
+      const attendance = await Attendance.findOneAndUpdate(
+        { userId: req.user._id, subjectId: firstSub._id, date: today },
+        { userId: req.user._id, subjectId: firstSub._id, classId: firstClass._id, date: today, status, markedBy: req.user._id },
+        { upsert: true, new: true, runValidators: true }
+      );
+      return res.status(200).json({ success: true, message: `Marked as ${status}`, data: attendance });
+    }
+
     const attendance = await Attendance.findOneAndUpdate(
       { userId: req.user._id, subjectId, date: today },
       { userId: req.user._id, subjectId, classId, date: today, status, markedBy: req.user._id },
       { upsert: true, new: true, runValidators: true }
     );
 
-    res.status(200).json({
-      success: true,
-      message: `Marked as ${status}`,
-      data: attendance,
-    });
+    res.status(200).json({ success: true, message: `Marked as ${status}`, data: attendance });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
