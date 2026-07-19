@@ -52,7 +52,6 @@ export default function AdminDoubtsPage() {
   };
 
   const handleDelete = async (doubtId: string) => {
-    if (!confirm('Delete this doubt?')) return;
     try {
       await api.delete(`/doubts/${doubtId}`);
       setDoubts(prev => prev.filter(d => d._id!==doubtId));

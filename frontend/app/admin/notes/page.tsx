@@ -98,7 +98,6 @@ export default function AdminNotesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this note?')) return;
     try {
       await api.delete(`/notes/${id}`);
       setNotes(prev => prev.filter(n => n._id !== id));

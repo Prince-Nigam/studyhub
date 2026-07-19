@@ -51,7 +51,6 @@ export default function AdminAnnouncementsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete announcement?')) return;
     try {
       await api.delete(`/announcements/${id}`);
       setAnnouncements(prev => prev.filter(a => a._id !== id));

@@ -65,7 +65,6 @@ export default function AdminChaptersPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete chapter?')) return;
     try {
       await api.delete(`/chapters/${id}`);
       setChapters(prev => prev.filter(c => c._id !== id));

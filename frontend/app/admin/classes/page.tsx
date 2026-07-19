@@ -107,7 +107,6 @@ export default function AdminClassesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this class?')) return;
     try {
       await api.delete(`/classes/${id}`);
       setClasses(prev => prev.filter(c => c._id !== id));

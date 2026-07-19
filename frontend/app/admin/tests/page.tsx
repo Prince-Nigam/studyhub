@@ -99,7 +99,6 @@ export default function AdminTestsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this test?')) return;
     try { await api.delete(`/tests/${id}`); setTests(prev => prev.filter(t => t._id !== id)); toast.success('Deleted'); } catch { toast.error('Failed'); }
   };
 

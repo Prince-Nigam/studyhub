@@ -39,7 +39,6 @@ export default function AdminUsersPage() {
   };
 
   const handleDelete = async (userId: string) => {
-    if (!confirm('Delete this user permanently?')) return;
     try {
       await api.delete(`/users/${userId}`);
       setUsers(prev => prev.filter(u => u._id !== userId));

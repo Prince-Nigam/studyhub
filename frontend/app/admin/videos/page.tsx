@@ -77,7 +77,6 @@ export default function AdminVideosPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this video?')) return;
     try {
       await api.delete(`/videos/${id}`);
       setVideos(prev => prev.filter(v => v._id !== id));
