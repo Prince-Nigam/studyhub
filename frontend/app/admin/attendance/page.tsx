@@ -36,16 +36,22 @@ export default function AdminAttendancePage() {
     if (id) {
       const r = await api.get(`/subjects?classId=${id}`).catch(() => null);
       setSubjects(r?.data?.data || []);
-      // Filter users by selectedClass matching class name
+      // Filter users by selectedClass — match all possible formats
       const cls = classes.find(c => c._id === id);
       if (cls) {
-        const filtered = allUsers.filter(u =>
-          u.selectedClass &&
-          (u.selectedClass === cls.name ||
-           u.selectedClass === `Class ${cls.grade}` ||
-           u.selectedClass === String(cls.grade))
-        );
-        setFilteredUsers(filtered.length > 0 ? filtered : allUsers);
+        const possibleValues = [
+          cls.name,                    // "Class 8"
+          String(cls.grade),           // "8"
+          `Class ${cls.grade}`,        // "Class 8"
+          `class ${cls.grade}`,        // "class 8"
+          `CLASS ${cls.grade}`,        // "CLASS 8"
+        ].map(v => v.toLowerCase().trim());
+
+        const filtered = allUsers.filter(u => {
+          const sc = (u.selectedClass || '').toLowerCase().trim();
+          return possibleValues.some(v => sc === v);
+        });
+        setFilteredUsers(filtered);
       }
     } else {
       setSubjects([]);
@@ -108,7 +114,7 @@ export default function AdminAttendancePage() {
         </div>
         <div style={{ flex:1, minWidth:0 }}>
           <p style={{ fontWeight:700, fontSize:13, color: isDark ? '#f1f5f9' : '#1e293b', marginBottom:2 }}>{user.fullName}</p>
-          {user.selectedClass && <p style={{ fontSize:11, color:'#64748b' }}>Class {user.selectedClass}</p>}
+          {user.selectedClass && <p style={{ fontSize:11, color:'#64748b' }}>{user.selectedClass}</p>}
         </div>
         <span style={{ fontSize:11, fontWeight:700, color:c.text, whiteSpace:'nowrap' }}>{c.label}</span>
       </div>
