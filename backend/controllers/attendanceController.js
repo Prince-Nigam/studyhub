@@ -49,35 +49,33 @@ exports.selfMark = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Find any subject/class to use as reference, or use user's own ID as placeholder
-    let subjectId = req.body.subjectId;
-    let classId   = req.body.classId;
-
-    // If dummy IDs passed, find a real subject or skip subject requirement
     const mongoose = require('mongoose');
-    const isValidId = (id) => mongoose.Types.ObjectId.isValid(id) && id !== '000000000000000000000000';
 
-    if (!isValidId(subjectId)) {
-      const Subject = require('../models/Subject');
-      const anySubject = await Subject.findOne();
-      if (anySubject) {
-        subjectId = anySubject._id;
-        classId   = anySubject.classId;
-      } else {
-        // No subjects exist — store with user ID as placeholder
-        subjectId = req.user._id;
-        classId   = req.user._id;
-      }
-    }
+    // Use a fixed placeholder ObjectId for self-mark (no subject)
+    const SELF_MARK_ID = new mongoose.Types.ObjectId('aaaaaaaaaaaaaaaaaaaaaaaa');
 
     const attendance = await Attendance.findOneAndUpdate(
-      { userId: req.user._id, date: today },
-      { userId: req.user._id, subjectId, classId, date: today, status, markedBy: req.user._id },
+      { userId: req.user._id, date: today, subjectId: SELF_MARK_ID },
+      {
+        userId: req.user._id,
+        subjectId: SELF_MARK_ID,
+        classId: SELF_MARK_ID,
+        date: today,
+        status,
+        markedBy: req.user._id,
+      },
       { upsert: true, new: true, runValidators: false }
     );
 
     res.status(200).json({
       success: true,
+      message: `Marked as ${status}`,
+      data: attendance,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
       message: `Marked as ${status}`,
       data: attendance,
     });
