@@ -53,14 +53,6 @@ node scripts/fullSeed.js
 
 ---
 
-## 🔑 Default Credentials
-
-| Role  | Email | Password |
-|-------|-------|----------|
-| Admin | hn878283@gmil.com | admin123 |
-
----
-
 ## 📁 Project Structure
 
 ```
