@@ -74,12 +74,21 @@ export default function AdminAttendancePage() {
 
   useEffect(() => { fetchReport(); }, [selDate, selSub, selClass]);
 
-  /* Build status map: userId → status */
+  /* Build status map: userId → status
+     Priority: absent > late > present
+     (if a student marked absent, that should win over any stale present record)
+  */
   const statusMap: Record<string, string> = {};
+  const STATUS_PRIORITY: Record<string, number> = { present: 1, late: 2, absent: 3 };
+
   report.forEach((a: any) => {
     const uid = a.userId?._id || a.userId;
-    // if multiple subjects, show 'present' if any present
-    if (!statusMap[uid] || a.status === 'present') statusMap[uid] = a.status;
+    const incoming = a.status;
+    const existing = statusMap[uid];
+    // keep whichever has higher priority (absent wins)
+    if (!existing || (STATUS_PRIORITY[incoming] ?? 0) > (STATUS_PRIORITY[existing] ?? 0)) {
+      statusMap[uid] = incoming;
+    }
   });
 
   const presentList = filteredUsers.filter(u => statusMap[u._id] === 'present');
