@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy } from 'lucide-react';
+import { Trophy, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/ThemeProvider';
 import api from '@/services/api';
@@ -47,11 +47,10 @@ export default function LeaderboardPage() {
   const { theme } = useTheme();
   const isDark    = theme === 'dark';
 
-  // Theme-aware colors
-  const textMain  = isDark ? '#f1f5f9' : '#0f172a';
-  const textSub   = isDark ? '#64748b'  : '#64748b';
-  const cardBg    = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)';
-  const cardBdr   = isDark ? 'rgba(255,255,255,0.06)' : '#e2e8f0';
+  const textMain = isDark ? '#f1f5f9' : '#0f172a';
+  const textSub  = isDark ? '#64748b'  : '#64748b';
+  const cardBg   = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)';
+  const cardBdr  = isDark ? 'rgba(255,255,255,0.06)' : '#e2e8f0';
 
   useEffect(() => {
     api.get('/users/leaderboard')
@@ -65,9 +64,14 @@ export default function LeaderboardPage() {
 
   return (
     <div style={{ padding: '24px', maxWidth: 700, margin: '0 auto' }}>
+
+      {/* Back button */}
       <button onClick={() => router.back()}
-        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:20 }}>
-        â† Back
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 14px', borderRadius:8,
+          border:'none', background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+          color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:20 }}>
+        <ArrowLeft size={14} />
+        Back
       </button>
 
       {/* Header */}
@@ -99,22 +103,36 @@ export default function LeaderboardPage() {
           {[top3[1], top3[0], top3[2]].filter(Boolean).map((entry, i) => {
             const isFirst = entry.rank === 1;
             const col     = RANK_COLORS[entry.rank - 1];
+            const bg      = RANK_BG[entry.rank - 1];
             return (
               <motion.div key={entry.userId}
                 initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }}
                 transition={{ delay:0.15 + i * 0.1 }}
-                style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8, flex:isFirst?'0 0 180px':'0 0 140px' }}>
-                {isFirst && <div style={{ fontSize:28 }}>ðŸ‘‘</div>}
+                style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8,
+                  flex: isFirst ? '0 0 180px' : '0 0 140px' }}>
 
+                {/* Crown for rank 1 */}
+                {isFirst && (
+                  <div style={{ fontSize:28, lineHeight:1 }}>&#x1F451;</div>
+                )}
+
+                {/* Avatar with rank badge */}
                 <div style={{ position:'relative' }}>
-                  <Avatar name={entry.fullName} pic={entry.profilePicture} size={isFirst?72:56} />
-                  <div style={{ position:'absolute', bottom:-4, right:-4, width:22, height:22, borderRadius:'50%', background:col, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:900, fontSize:11, color:'#000', border:`2px solid ${isDark?'#060714':'#f8faff'}` }}>
+                  <Avatar name={entry.fullName} pic={entry.profilePicture} size={isFirst ? 72 : 56} />
+                  <div style={{
+                    position:'absolute', bottom:-4, right:-4,
+                    width:22, height:22, borderRadius:'50%',
+                    background:col, display:'flex', alignItems:'center', justifyContent:'center',
+                    fontWeight:900, fontSize:11, color:'#000',
+                    border:`2px solid ${isDark ? '#060714' : '#f8faff'}`
+                  }}>
                     {entry.rank}
                   </div>
                 </div>
 
+                {/* Name & class */}
                 <div style={{ textAlign:'center' }}>
-                  <p style={{ fontWeight:800, color:textMain, fontSize:isFirst?15:13, marginBottom:2 }}>
+                  <p style={{ fontWeight:800, color:textMain, fontSize:isFirst ? 15 : 13, marginBottom:2 }}>
                     {entry.fullName}
                   </p>
                   {entry.selectedClass && (
@@ -122,18 +140,29 @@ export default function LeaderboardPage() {
                   )}
                 </div>
 
-                <div style={{ width:'100%', padding:'10px 14px', background:RANK_BG[entry.rank-1], border:`1px solid ${col}30`, borderRadius:14, textAlign:'center', minHeight:isFirst?100:80, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:4 }}>
-                  <p style={{ fontSize:isFirst?24:20, fontWeight:900, color:col, lineHeight:1 }}>{entry.avgPercentage}%</p>
+                {/* Score box */}
+                <div style={{
+                  width:'100%', padding:'10px 14px',
+                  background: bg,
+                  border:`1px solid ${col}50`,
+                  borderRadius:14, textAlign:'center',
+                  minHeight: isFirst ? 100 : 80,
+                  display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:4
+                }}>
+                  <p style={{ fontSize: isFirst ? 24 : 20, fontWeight:900, color:col, lineHeight:1 }}>
+                    {entry.avgPercentage}%
+                  </p>
                   <p style={{ fontSize:10, color:textSub }}>avg score</p>
                   <p style={{ fontSize:11, color:textSub }}>{entry.totalTests} tests</p>
                 </div>
+
               </motion.div>
             );
           })}
         </motion.div>
       )}
 
-      {/* Rank 4â€“10 list */}
+      {/* Rank 4+ list */}
       {!loading && rest.length > 0 && (
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
           {rest.map((entry, i) => {
@@ -143,8 +172,8 @@ export default function LeaderboardPage() {
                 initial={{ opacity:0, x:-20 }} animate={{ opacity:1, x:0 }}
                 transition={{ delay:0.3 + i * 0.05 }}
                 style={{ display:'flex', alignItems:'center', gap:14, padding:'14px 18px', borderRadius:16,
-                  background:isMe?'rgba(124,58,237,0.12)':cardBg,
-                  border:`1px solid ${isMe?'rgba(124,58,237,0.3)':cardBdr}` }}>
+                  background: isMe ? 'rgba(124,58,237,0.12)' : cardBg,
+                  border:`1px solid ${isMe ? 'rgba(124,58,237,0.3)' : cardBdr}` }}>
 
                 <div style={{ width:32, textAlign:'center', fontWeight:800, color:textSub, fontSize:15, flexShrink:0 }}>
                   #{entry.rank}
@@ -157,7 +186,7 @@ export default function LeaderboardPage() {
                     {entry.fullName} {isMe && <span style={{ fontSize:11, color:'#a78bfa' }}>(You)</span>}
                   </p>
                   <p style={{ fontSize:12, color:textSub }}>
-                    {entry.selectedClass?`Class ${entry.selectedClass} Â· `:''}{entry.totalTests} tests taken
+                    {entry.selectedClass ? `Class ${entry.selectedClass} · ` : ''}{entry.totalTests} tests taken
                   </p>
                 </div>
 
@@ -178,7 +207,9 @@ export default function LeaderboardPage() {
       )}
 
       {!loading && data.length > 0 && !data.find(e => e.userId === user?._id) && (
-        <div style={{ marginTop:20, padding:'14px 18px', borderRadius:16, background:'rgba(124,58,237,0.08)', border:'1px solid rgba(124,58,237,0.2)', textAlign:'center', color:textSub, fontSize:13 }}>
+        <div style={{ marginTop:20, padding:'14px 18px', borderRadius:16,
+          background:'rgba(124,58,237,0.08)', border:'1px solid rgba(124,58,237,0.2)',
+          textAlign:'center', color:textSub, fontSize:13 }}>
           Attempt more tests to appear on the leaderboard!
         </div>
       )}
