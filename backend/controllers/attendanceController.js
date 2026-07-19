@@ -76,13 +76,6 @@ exports.selfMark = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-      message: `Marked as ${status}`,
-      data: attendance,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
 
 // @desc    Get today's attendance status for student
 // @route   GET /api/attendance/today
