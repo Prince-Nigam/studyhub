@@ -7,7 +7,7 @@ import {
   LayoutDashboard, GraduationCap, FileText, Video,
   Brain, Calendar, Download, User, Settings,
   LogOut, ChevronLeft, ChevronRight, Bell, Trophy,
-  BookOpen, Medal, MessageCircle,
+  BookOpen, Medal, MessageCircle, Megaphone,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -19,10 +19,11 @@ const NAV = [
   { href: '/dashboard/tests',         icon: Brain,           label: 'MCQ Tests'   },
   { href: '/dashboard/results',       icon: Trophy,          label: 'Results'     },
   { href: '/dashboard/leaderboard',   icon: Medal,           label: 'Leaderboard' },
-  { href: '/dashboard/doubts',        icon: MessageCircle,   label: 'Doubts'      },
-  { href: '/dashboard/attendance',    icon: Calendar,        label: 'Attendance'  },
-  { href: '/dashboard/downloads',     icon: Download,        label: 'Downloads'   },
-  { href: '/dashboard/notifications', icon: Bell,            label: 'Alerts'      },
+  { href: '/dashboard/doubts',        icon: MessageCircle,   label: 'Doubts'       },
+  { href: '/dashboard/announcements', icon: Megaphone,       label: 'Announcements'},
+  { href: '/dashboard/attendance',    icon: Calendar,        label: 'Attendance'   },
+  { href: '/dashboard/downloads',     icon: Download,        label: 'Downloads'    },
+  { href: '/dashboard/notifications', icon: Bell,            label: 'Alerts'       },
   { href: '/dashboard/profile',       icon: User,            label: 'Profile'     },
   { href: '/dashboard/settings',      icon: Settings,        label: 'Settings'    },
 ];
