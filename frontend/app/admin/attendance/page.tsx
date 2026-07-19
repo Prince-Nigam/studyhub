@@ -11,18 +11,23 @@ export default function AdminAttendancePage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const [classes,   setClasses]   = useState<any[]>([]);
-  const [subjects,  setSubjects]  = useState<any[]>([]);
-  const [report,    setReport]    = useState<any[]>([]);
-  const [allUsers,  setAllUsers]  = useState<any[]>([]);
-  const [selClass,  setSelClass]  = useState('');
-  const [selSub,    setSelSub]    = useState('');
-  const [selDate,   setSelDate]   = useState(new Date().toISOString().split('T')[0]);
-  const [loading,   setLoading]   = useState(false);
+  const [classes,       setClasses]       = useState<any[]>([]);
+  const [subjects,      setSubjects]      = useState<any[]>([]);
+  const [report,        setReport]        = useState<any[]>([]);
+  const [allUsers,      setAllUsers]      = useState<any[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
+  const [selClass,      setSelClass]      = useState('');
+  const [selSub,        setSelSub]        = useState('');
+  const [selDate,       setSelDate]       = useState(new Date().toISOString().split('T')[0]);
+  const [loading,       setLoading]       = useState(false);
 
   useEffect(() => {
     Promise.all([api.get('/classes'), api.get('/users?limit=200')])
-      .then(([c, u]) => { setClasses(c.data.data || []); setAllUsers(u.data.data || []); })
+      .then(([c, u]) => {
+        setClasses(c.data.data || []);
+        setAllUsers(u.data.data || []);
+        setFilteredUsers(u.data.data || []);
+      })
       .catch(() => {});
   }, []);
 
@@ -31,6 +36,20 @@ export default function AdminAttendancePage() {
     if (id) {
       const r = await api.get(`/subjects?classId=${id}`).catch(() => null);
       setSubjects(r?.data?.data || []);
+      // Filter users by selectedClass matching class name
+      const cls = classes.find(c => c._id === id);
+      if (cls) {
+        const filtered = allUsers.filter(u =>
+          u.selectedClass &&
+          (u.selectedClass === cls.name ||
+           u.selectedClass === `Class ${cls.grade}` ||
+           u.selectedClass === String(cls.grade))
+        );
+        setFilteredUsers(filtered.length > 0 ? filtered : allUsers);
+      }
+    } else {
+      setSubjects([]);
+      setFilteredUsers(allUsers);
     }
   };
 
@@ -56,9 +75,9 @@ export default function AdminAttendancePage() {
     if (!statusMap[uid] || a.status === 'present') statusMap[uid] = a.status;
   });
 
-  const presentList = allUsers.filter(u => statusMap[u._id] === 'present');
-  const lateList    = allUsers.filter(u => statusMap[u._id] === 'late');
-  const absentList  = allUsers.filter(u => statusMap[u._id] === 'absent' || !statusMap[u._id]);
+  const presentList = filteredUsers.filter(u => statusMap[u._id] === 'present');
+  const lateList    = filteredUsers.filter(u => statusMap[u._id] === 'late');
+  const absentList  = filteredUsers.filter(u => statusMap[u._id] === 'absent' || !statusMap[u._id]);
 
   const card  = isDark ? 'bg-slate-800/60 border-slate-700/50' : 'bg-white border-slate-200 shadow-sm';
   const input = `px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:border-indigo-500 ${isDark ? 'bg-slate-700 border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'}`;
@@ -113,7 +132,7 @@ export default function AdminAttendancePage() {
       <div className={`p-5 rounded-2xl border ${card} mb-6`}>
         <div className="flex flex-wrap gap-3">
           <select value={selClass} onChange={e => handleClassChange(e.target.value)} className={input}>
-            <option value="">All Classes</option>
+            <option value="">All Classes (All Students)</option>
             {classes.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
           </select>
           <select value={selSub} onChange={e => { setSelSub(e.target.value); }} className={input}>
@@ -168,7 +187,7 @@ export default function AdminAttendancePage() {
         </div>
       )}
 
-      {allUsers.length === 0 && (
+      {filteredUsers.length === 0 && (
         <div style={{ textAlign:'center', padding:'60px', color:'#475569' }}>
           <Users size={40} color="#334155" style={{ margin:'0 auto 12px' }} />
           <p>No students found</p>
