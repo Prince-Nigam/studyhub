@@ -21,6 +21,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     if (stored) {
       setTheme(stored);
       document.documentElement.classList.toggle('dark', stored === 'dark');
+      document.documentElement.classList.toggle('light', stored === 'light');
     } else {
       document.documentElement.classList.add('dark');
     }
@@ -31,6 +32,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     setTheme(next);
     localStorage.setItem('theme', next);
     document.documentElement.classList.toggle('dark', next === 'dark');
+    document.documentElement.classList.toggle('light', next === 'light');
   };
 
   return (

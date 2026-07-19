@@ -12,6 +12,12 @@ body {
   overflow-x: hidden;
 }
 
+/* ── Light mode body override ───────────────────────── */
+html:not(.dark) body {
+  background: #f8faff;
+  color: #0f172a;
+}
+
 /* ── Scrollbar ──────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -85,6 +91,5 @@ body {
 .truncate-2 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
 /* ── Light mode ─────────────────────────────────────── */
-.light body  { background: #f8faff; color: #0f172a; }
-.light .card { background: #ffffff; border-color: #e2e8f0; box-shadow: 0 1px 6px rgba(0,0,0,.06); }
-.light .skeleton { background: linear-gradient(90deg,#e2e8f0 25%,#cbd5e1 50%,#e2e8f0 75%); background-size:400px 100%; }
+html:not(.dark) .card { background: #ffffff; border-color: #e2e8f0; box-shadow: 0 1px 6px rgba(0,0,0,.06); }
+html:not(.dark) .skeleton { background: linear-gradient(90deg,#e2e8f0 25%,#cbd5e1 50%,#e2e8f0 75%); background-size:400px 100%; }
