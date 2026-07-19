@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Brain, Clock, CheckSquare, Trophy, ArrowRight, Zap } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
+import { useRouter } from 'next/navigation';
 import api from '@/services/api';
 
 const difficultyColors: Record<string, string> = {
@@ -16,6 +17,7 @@ const difficultyColors: Record<string, string> = {
 export default function TestsPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const router = useRouter();
   const [tests, setTests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,6 +35,10 @@ export default function TestsPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
+      <button onClick={() => router.back()}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:16 }}>
+        ← Back
+      </button>
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
         <h1 className="text-3xl font-black mb-2">MCQ Tests</h1>
         <p className={isDark ? 'text-slate-400' : 'text-slate-600'}>Chapter-wise tests with timer, auto-evaluation and leaderboard</p>

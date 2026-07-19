@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, Plus, X, Send, ThumbsUp, CheckCircle, Clock, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
 import toast from 'react-hot-toast';
@@ -12,6 +13,7 @@ export default function DoubtsPage() {
   const { theme } = useTheme();
   const { user }  = useAuth();
   const isDark    = theme === 'dark';
+  const router    = useRouter();
 
   const [doubts,    setDoubts]    = useState<any[]>([]);
   const [loading,   setLoading]   = useState(true);
@@ -79,6 +81,10 @@ export default function DoubtsPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
+      <button onClick={() => router.back()}
+        style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'6px 12px', borderRadius:8, border:'none', background:'rgba(255,255,255,0.06)', color:'#94a3b8', fontWeight:600, fontSize:12, cursor:'pointer', marginBottom:16 }}>
+        ← Back
+      </button>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-black mb-1">Doubts</h1>
