@@ -63,9 +63,10 @@ export default function AdminAttendancePage() {
     if (!selDate) return;
     setLoading(true);
     try {
+      // Fetch without classId filter — get ALL attendance for this date
+      // then match with filteredUsers on frontend
       const params = new URLSearchParams({ startDate: selDate, endDate: selDate });
-      if (selSub)   params.append('subjectId', selSub);
-      if (selClass) params.append('classId',   selClass);
+      if (selSub) params.append('subjectId', selSub);
       const r = await api.get(`/attendance/report?${params}`);
       setReport(r.data.data || []);
     } catch {} finally { setLoading(false); }
