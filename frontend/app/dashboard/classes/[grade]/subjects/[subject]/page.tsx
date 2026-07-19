@@ -149,12 +149,6 @@ export default function SubjectDetailPage() {
                       )}
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className={`text-xs px-2 py-1 rounded-lg font-semibold ${chNotes.length > 0 ? 'bg-violet-500/20 text-violet-400' : isDark?'bg-slate-700 text-slate-500':'bg-slate-100 text-slate-400'}`}>
-                        📄 {chNotes.length}
-                      </span>
-                      <span className={`text-xs px-2 py-1 rounded-lg font-semibold ${chVideos.length > 0 ? 'bg-blue-500/20 text-blue-400' : isDark?'bg-slate-700 text-slate-500':'bg-slate-100 text-slate-400'}`}>
-                        🎬 {chVideos.length}
-                      </span>
                       <ChevronRight size={16} className="text-slate-500" />
                     </div>
                   </motion.div>
