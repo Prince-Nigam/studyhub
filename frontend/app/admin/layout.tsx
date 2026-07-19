@@ -4,11 +4,9 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, GraduationCap, BookOpen, Video, Brain,
-  Calendar, Users, Bell, Megaphone, Shield, LogOut, FileText,
-  Layers, RefreshCw, Trophy, MessageCircle, ChevronLeft, ChevronRight,
+  Calendar, Users, Bell, Megaphone, Shield, LogOut, FileText, Layers, RefreshCw, Trophy, MessageCircle
 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { Loader2 } from 'lucide-react';
@@ -22,7 +20,7 @@ const adminNav = [
   { href: '/admin/videos',        icon: Video,           label: 'Videos' },
   { href: '/admin/tests',         icon: Brain,           label: 'Tests' },
   { href: '/admin/results',       icon: Trophy,          label: 'Results' },
-  { href: '/admin/doubts',        icon: MessageCircle,   label: 'Doubts' },
+  { href: '/admin/doubts',        icon: MessageCircle,   label: 'Doubts'  },
   { href: '/admin/attendance',    icon: Calendar,        label: 'Attendance' },
   { href: '/admin/users',         icon: Users,           label: 'Users' },
   { href: '/admin/announcements', icon: Megaphone,       label: 'Announcements' },
@@ -35,8 +33,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
   const isDark = theme === 'dark';
-
-  const [collapsed, setCollapsed] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = useCallback(() => {
@@ -47,6 +43,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     if (!loading && !isAuthenticated && pathname !== '/admin/login') {
+      // Redirect to unified login page (not admin/login)
       router.push('/login');
     }
     if (!loading && isAuthenticated && user?.role !== 'admin' && pathname !== '/admin/login') {
@@ -66,148 +63,51 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className={`flex h-screen overflow-hidden ${isDark ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`}>
-
       {/* Admin Sidebar */}
-      <motion.aside
-        animate={{ width: collapsed ? 68 : 256 }}
-        transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-        style={{
-          position: 'relative', display: 'flex', flexDirection: 'column',
-          height: '100vh', flexShrink: 0, overflow: 'hidden',
-          background: '#0f172a', borderRight: '1px solid rgba(255,255,255,0.06)',
-          zIndex: 20,
-        }}
-      >
-        {/* Logo */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          padding: '0 14px', height: 64, flexShrink: 0,
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          justifyContent: collapsed ? 'center' : 'flex-start',
-        }}>
-          <div style={{
-            width: 36, height: 36, minWidth: 36, borderRadius: 10,
-            background: 'linear-gradient(135deg,#6366f1,#3b82f6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(99,102,241,0.3)', flexShrink: 0,
-          }}>
-            <Shield size={18} color="#fff" />
+      <aside className="w-64 flex-shrink-0 bg-slate-900 border-r border-slate-800 flex flex-col h-screen">
+        <div className="flex items-center gap-3 p-4 border-b border-slate-800 h-16">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center">
+            <Shield size={18} className="text-white" />
           </div>
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.18 }}
-              >
-                <p style={{ fontWeight: 900, fontSize: 15, color: '#fff', lineHeight: 1, whiteSpace: 'nowrap' }}>Admin Panel</p>
-                <p style={{ fontSize: 10, color: '#475569', marginTop: 2 }}>StudyPlatform</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <div>
+            <p className="text-white font-black text-sm">Admin Panel</p>
+            <p className="text-slate-500 text-xs">StudyPlatform</p>
+          </div>
         </div>
 
-        {/* Nav */}
-        <nav style={{
-          flex: 1, padding: '10px 8px', overflowY: 'auto',
-          display: 'flex', flexDirection: 'column', gap: 2,
-        }} className="scrollbar-hide">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {adminNav.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
             return (
-              <Link key={item.href} href={item.href} title={collapsed ? item.label : undefined}>
-                <motion.div
-                  whileHover={{ x: collapsed ? 0 : 3 }}
-                  whileTap={{ scale: 0.97 }}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 10,
-                    padding: collapsed ? '9px 0' : '9px 12px',
-                    justifyContent: collapsed ? 'center' : 'flex-start',
-                    borderRadius: 11, cursor: 'pointer', transition: 'all .15s',
-                    background: isActive
-                      ? 'linear-gradient(135deg,#6366f1,#3b82f6)'
-                      : 'transparent',
-                    boxShadow: isActive ? '0 4px 12px rgba(99,102,241,0.28)' : 'none',
-                  }}
-                  className={isActive ? '' : 'hover-nav'}
-                >
-                  <item.icon size={18} color={isActive ? '#fff' : '#64748b'} style={{ flexShrink: 0 }} />
-                  <AnimatePresence>
-                    {!collapsed && (
-                      <motion.span
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        style={{
-                          fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap',
-                          color: isActive ? '#fff' : '#94a3b8',
-                        }}
-                      >
-                        {item.label}
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
+              <Link key={item.href} href={item.href}>
+                <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-gradient-to-r from-indigo-500 to-blue-600 text-white'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                }`}>
+                  <item.icon size={18} />
+                  <span className="text-sm font-medium">{item.label}</span>
+                </div>
               </Link>
             );
           })}
         </nav>
 
-        {/* User footer */}
-        <div style={{ padding: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '10px', borderRadius: 12,
-            background: 'rgba(255,255,255,0.04)',
-            justifyContent: collapsed ? 'center' : 'flex-start',
-          }}>
-            <div style={{
-              width: 34, height: 34, minWidth: 34, borderRadius: '50%',
-              background: 'linear-gradient(135deg,#6366f1,#3b82f6)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontWeight: 700, fontSize: 14, flexShrink: 0,
-            }}>
+        <div className="p-3 border-t border-slate-800">
+          <div className={`flex items-center gap-3 p-3 rounded-xl bg-slate-800`}>
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
               {user?.fullName?.[0]?.toUpperCase()}
             </div>
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.div
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  style={{ flex: 1, minWidth: 0 }}
-                >
-                  <p style={{ fontSize: 12, fontWeight: 700, color: '#f1f5f9', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {user?.fullName}
-                  </p>
-                  <p style={{ fontSize: 11, color: '#475569' }}>Administrator</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.button
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  onClick={logout}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: 8, flexShrink: 0 }}
-                  title="Logout"
-                >
-                  <LogOut size={15} color="#64748b" />
-                </motion.button>
-              )}
-            </AnimatePresence>
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-sm font-semibold truncate">{user?.fullName}</p>
+              <p className="text-slate-500 text-xs">Administrator</p>
+            </div>
+            <button onClick={logout} className="text-slate-500 hover:text-red-400 transition-colors">
+              <LogOut size={16} />
+            </button>
           </div>
         </div>
-
-        {/* Collapse toggle button */}
-        <button
-          onClick={() => setCollapsed(v => !v)}
-          style={{
-            position: 'absolute', right: -12, top: 72,
-            width: 24, height: 24, borderRadius: '50%',
-            background: '#6366f1', border: '2px solid #0f172a',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', boxShadow: '0 2px 8px rgba(99,102,241,0.4)', zIndex: 30,
-          }}
-        >
-          {collapsed ? <ChevronRight size={12} color="#fff" /> : <ChevronLeft size={12} color="#fff" />}
-        </button>
-      </motion.aside>
+      </aside>
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
