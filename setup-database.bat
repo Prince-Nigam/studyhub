@@ -20,7 +20,7 @@ node scripts/fullSeed.js
 echo.
 echo ============================================
 echo   Setup Complete!
-echo   Admin: admin@studyplatform.com / Admin@123
+echo   Admin: admin@studyplatform.com /
 echo   Open: http://localhost:3000
 echo ============================================
 pause
