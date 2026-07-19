@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import {
   LayoutDashboard, GraduationCap, BookOpen, Video, Brain,
-  Calendar, Users, Bell, Megaphone, Shield, LogOut, FileText, Layers, RefreshCw, Trophy, MessageCircle
+  Calendar, Users, Bell, Megaphone, Shield, LogOut, FileText, Layers, RefreshCw, Trophy, MessageCircle, Moon, Sun
 } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import { Loader2 } from 'lucide-react';
@@ -29,7 +29,7 @@ const adminNav = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading, user, logout } = useAuth();
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const isDark = theme === 'dark';
@@ -123,6 +123,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               style={{ border: 'none', cursor: 'pointer' }}>
               <RefreshCw size={15} style={{ animation: refreshing ? 'spin 0.8s linear infinite' : 'none' }} />
             </button>
+
+            {/* Dark / Light toggle */}
+            <button
+              onClick={toggleTheme}
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${isDark ? 'bg-slate-800 hover:bg-slate-700 text-yellow-400' : 'bg-slate-100 hover:bg-slate-200 text-slate-600'}`}
+              style={{ border: 'none', cursor: 'pointer' }}>
+              {isDark ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+
             <div className="flex items-center gap-2 text-sm text-slate-400">
               <Shield size={14} className="text-indigo-400" />
               Admin Mode
