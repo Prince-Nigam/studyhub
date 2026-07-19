@@ -65,6 +65,7 @@ export default function SubjectDetailPage() {
   ];
 
   return (
+    <>
     <div className="max-w-6xl mx-auto">
       {/* Breadcrumb */}
       <div className={`flex items-center gap-2 text-sm mb-6 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
@@ -364,5 +365,6 @@ export default function SubjectDetailPage() {
         </div>
       )}
     </AnimatePresence>
+    </>
   );
 }
