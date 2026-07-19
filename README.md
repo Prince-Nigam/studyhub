@@ -107,8 +107,6 @@ Study Website/
 ### Auth
 - `POST /api/auth/register`   — Student signup
 - `POST /api/auth/login`      — Student login
-- `POST /api/auth/admin/login`— Admin login
-- `POST /api/auth/admin/setup`— Create first admin (once)
 - `GET  /api/auth/me`         — Get current user
 
 ### Classes / Subjects / Chapters
@@ -118,11 +116,9 @@ Study Website/
 
 ### Notes
 - `GET  /api/notes?classId=&subjectId=&type=&search=`
-- `POST /api/notes` (admin)
-
+  
 ### Videos
 - `GET  /api/videos?subjectId=`
-- `POST /api/videos` (admin)
 
 ### Tests
 - `GET  /api/tests?subjectId=&isPublished=true`
@@ -131,7 +127,7 @@ Study Website/
 
 ### Attendance
 - `GET  /api/attendance/my`
-- `POST /api/attendance/bulk` (admin)
+- `POST /api/attendance/bulk`
 
 ### Search
 - `GET  /api/search?q=keyword`
