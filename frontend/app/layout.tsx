@@ -7,6 +7,9 @@ import ThemeProvider from "@/components/ThemeProvider";
 export const metadata: Metadata = {
   title: "StudyPlatform – Premium Learning for Class 1–12",
   description: "Notes, videos, MCQ tests and attendance tracking for Class 1 to 12.",
+  verification: {
+    google: "EB8IAw9stspZ4fQIAI1V6z9w6CUKLCstTf89xBleH-M",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
