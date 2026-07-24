@@ -2,12 +2,15 @@ const User = require('../models/User');
 const Admin = require('../models/Admin');
 const { generateToken } = require('../middleware/auth');
 
+const normalizeEmail = (email) => typeof email === 'string' ? email.trim().toLowerCase() : email;
+
 // @desc    Register new user
 // @route   POST /api/auth/register
 // @access  Public
 exports.register = async (req, res) => {
   try {
-    const { fullName, email, mobile, password } = req.body;
+    const { fullName, mobile, password } = req.body;
+    const email = normalizeEmail(req.body.email);
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -45,7 +48,8 @@ exports.register = async (req, res) => {
 // @access  Public
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const email = normalizeEmail(req.body.email);
 
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide email and password' });
@@ -96,7 +100,8 @@ exports.login = async (req, res) => {
 // @access  Public
 exports.adminLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const email = normalizeEmail(req.body.email);
 
     const admin = await Admin.findOne({ email }).select('+password');
     if (!admin) {

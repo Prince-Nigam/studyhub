@@ -6,8 +6,6 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { Eye, EyeOff, BookOpen, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import api from '@/services/api';
-import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 interface LoginForm { email: string; password: string; }
@@ -15,32 +13,23 @@ interface LoginForm { email: string; password: string; }
 export default function LoginPage() {
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
-  const router = useRouter();
+  const { login, adminLogin } = useAuth();
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
 
   const onSubmit = async (data: LoginForm) => {
     setLoading(true);
     try {
-      // Try admin login first
+      await adminLogin(data.email, data.password);
+    } catch {
       try {
-        const adminRes = await api.post('/auth/admin/login', data);
-        if (adminRes.data.success) {
-          const { token, user: adminUser } = adminRes.data;
-          localStorage.setItem('token', token);
-          localStorage.setItem('user', JSON.stringify(adminUser));
-          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          toast.success('Welcome Admin!');
-          router.push('/admin/dashboard');
-          return;
-        }
-      } catch { /* not admin, try student */ }
+        await login(data.email, data.password);
+      } catch (loginError: unknown) {
+        const errorMessage = typeof loginError === 'object' && loginError !== null && 'response' in loginError
+          ? (loginError as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
 
-      // Try student login
-      await login(data.email, data.password);
-
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Invalid email or password');
+        toast.error(errorMessage || 'Invalid email or password');
+      }
     } finally {
       setLoading(false);
     }
@@ -159,7 +148,7 @@ export default function LoginPage() {
           {/* Divider */}
           <div style={{ display:'flex', alignItems:'center', gap:12, margin:'24px 0' }}>
             <div style={{ flex:1, height:1, background:'rgba(255,255,255,.06)' }} />
-            <span style={{ fontSize:12, color:'#334155' }}>Don't have an account?</span>
+            <span style={{ fontSize:12, color:'#334155' }}>Don&apos;t have an account?</span>
             <div style={{ flex:1, height:1, background:'rgba(255,255,255,.06)' }} />
           </div>
 

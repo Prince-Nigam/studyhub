@@ -43,6 +43,7 @@ interface RegisterData {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -64,7 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await api.post('/auth/login', { email, password });
+    const normalizedEmail = normalizeEmail(email);
+    const response = await api.post('/auth/login', { email: normalizedEmail, password });
     const { token: newToken, user: newUser, message } = response.data;
 
     setToken(newToken);
@@ -83,7 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const adminLogin = async (email: string, password: string) => {
-    const response = await api.post('/auth/admin/login', { email, password });
+    const normalizedEmail = normalizeEmail(email);
+    const response = await api.post('/auth/admin/login', { email: normalizedEmail, password });
     const { token: newToken, user: newUser } = response.data;
 
     setToken(newToken);
@@ -97,7 +100,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (data: RegisterData) => {
-    const response = await api.post('/auth/register', data);
+    const response = await api.post('/auth/register', {
+      ...data,
+      email: normalizeEmail(data.email),
+    });
     const { token: newToken, user: newUser, message } = response.data;
 
     setToken(newToken);
