@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import ThemeProvider from "@/components/ThemeProvider";
+import ChatbotAvatarOverride from "@/components/ChatbotAvatarOverride";
 
 export const metadata: Metadata = {
   title: "StudyPlatform – Premium Learning for Class 1–12",
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <AuthProvider>
             {children}
+            <ChatbotAvatarOverride />
             <Toaster
               position="top-right"
               toastOptions={{
