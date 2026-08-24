@@ -38,6 +38,13 @@ export default function ChatbotAvatarOverride() {
         });
       }
 
+      const container = root.querySelector<HTMLElement>('.chatzy-chatbot-container');
+      if (launcher && container && getComputedStyle(launcher).display !== 'none') {
+        container.classList.remove('show');
+        container.style.removeProperty('visibility');
+        container.style.removeProperty('transform');
+      }
+
       shadowObserver ??= new MutationObserver(replaceAvatar);
       shadowObserver.observe(root, { childList: true, subtree: true });
       return true;
