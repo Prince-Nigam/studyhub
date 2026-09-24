@@ -9,7 +9,6 @@ import {
   BookOpen, Phone, Lock, Eye, EyeOff,
   ArrowRight, ArrowLeft, Loader2, CheckCircle,
 } from 'lucide-react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/services/api';
@@ -131,7 +130,7 @@ export default function ForgotPasswordPage() {
   const sendOtp = async (data: MobileForm) => {
     setLoading(true);
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`, {
+      await api.post('/auth/forgot-password', {
         mobile: data.mobile.trim(),
       });
       setMobile(data.mobile.trim());
@@ -154,7 +153,7 @@ export default function ForgotPasswordPage() {
     setOtpError('');
     setLoading(true);
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-otp`, {
+      const res = await api.post('/auth/verify-otp', {
         mobile,
         otp,
       });
@@ -173,7 +172,7 @@ export default function ForgotPasswordPage() {
   const resetPassword = async (data: PasswordForm) => {
     setLoading(true);
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password`, {
+      const res = await api.post('/auth/reset-password', {
         mobile,
         resetToken,
         password: data.password,
