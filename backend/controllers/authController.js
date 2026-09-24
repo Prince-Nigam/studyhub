@@ -1,21 +1,23 @@
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+const twilio = require('twilio');
 const User = require('../models/User');
 const Admin = require('../models/Admin');
 const { generateToken } = require('../middleware/auth');
 
-// ── Email transporter (uses env vars) ──────────────────────────────────────
-const createTransporter = () => nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const normalizeEmail = (email) =>
+  typeof email === 'string' ? email.trim().toLowerCase() : email;
 
-const normalizeEmail = (email) => typeof email === 'string' ? email.trim().toLowerCase() : email;
+// ── Twilio client (lazy — only created when needed) ────────────────────────
+const getTwilioClient = () =>
+  twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+// ── Generate a 6-digit OTP ─────────────────────────────────────────────────
+const generateOTP = () =>
+  Math.floor(100000 + Math.random() * 900000).toString();
+
+// ── Hash OTP before storing (sha256) ──────────────────────────────────────
+const hashOTP = (otp) =>
+  crypto.createHash('sha256').update(otp).digest('hex');
 
 // @desc    Register new user
 // @route   POST /api/auth/register
@@ -25,15 +27,12 @@ exports.register = async (req, res) => {
     const { fullName, mobile, password } = req.body;
     const email = normalizeEmail(req.body.email);
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'Email already registered' });
     }
 
-    // Create user
     const user = await User.create({ fullName, email, mobile, password });
-
     const token = generateToken(user._id, 'student');
 
     res.status(201).json({
@@ -48,8 +47,8 @@ exports.register = async (req, res) => {
         role: user.role,
         profilePicture: user.profilePicture,
         selectedClass: user.selectedClass,
-        studyProgress: user.studyProgress
-      }
+        studyProgress: user.studyProgress,
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -74,7 +73,10 @@ exports.login = async (req, res) => {
     }
 
     if (user.isBlocked) {
-      return res.status(403).json({ success: false, message: 'Your account has been blocked. Contact support.' });
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been blocked. Contact support.',
+      });
     }
 
     const isMatch = await user.matchPassword(password);
@@ -82,7 +84,6 @@ exports.login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
 
-    // Update last login
     user.lastLogin = new Date();
     await user.save({ validateBeforeSave: false });
 
@@ -100,8 +101,8 @@ exports.login = async (req, res) => {
         role: user.role,
         profilePicture: user.profilePicture,
         selectedClass: user.selectedClass,
-        studyProgress: user.studyProgress
-      }
+        studyProgress: user.studyProgress,
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -139,8 +140,8 @@ exports.adminLogin = async (req, res) => {
         _id: admin._id,
         fullName: admin.fullName,
         email: admin.email,
-        role: 'admin'
-      }
+        role: 'admin',
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -155,7 +156,7 @@ exports.getMe = async (req, res) => {
     const user = await User.findById(req.user._id)
       .populate('watchLater', 'title thumbnailUrl duration')
       .populate('bookmarkedNotes', 'title type');
-    
+
     if (!user) {
       const admin = await Admin.findById(req.user._id);
       return res.json({ success: true, user: admin });
@@ -169,7 +170,7 @@ exports.getMe = async (req, res) => {
 
 // @desc    Create initial admin (run once)
 // @route   POST /api/auth/admin/setup
-// @access  Public (should be disabled after setup)
+// @access  Public
 exports.setupAdmin = async (req, res) => {
   try {
     const adminCount = await Admin.countDocuments();
@@ -180,7 +181,7 @@ exports.setupAdmin = async (req, res) => {
     const {
       fullName = 'Admin',
       email = 'admin@studyplatform.com',
-      password = 'Admin@123'
+      password = 'Admin@123',
     } = req.body || {};
 
     const admin = await Admin.create({ fullName, email, password });
@@ -188,98 +189,160 @@ exports.setupAdmin = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Admin created successfully',
-      credentials: { email: admin.email }
+      credentials: { email: admin.email },
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// @desc    Send password reset email
+// ═══════════════════════════════════════════════════════════════════════════
+//  FORGOT PASSWORD — OTP via SMS
+// ═══════════════════════════════════════════════════════════════════════════
+
+// @desc    Send OTP to student's registered mobile number
 // @route   POST /api/auth/forgot-password
 // @access  Public
 exports.forgotPassword = async (req, res) => {
   try {
-    const email = normalizeEmail(req.body.email);
-    if (!email) {
-      return res.status(400).json({ success: false, message: 'Please provide your email address' });
+    const { mobile } = req.body;
+
+    if (!mobile || !/^[0-9]{10}$/.test(mobile.trim())) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Please provide a valid 10-digit mobile number' });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ mobile: mobile.trim() });
+
+    // Generic response — don't reveal if number exists
     if (!user) {
-      // Don't reveal whether email exists — send generic success
-      return res.json({ success: true, message: 'If that email is registered, a reset link has been sent.' });
+      return res.json({
+        success: true,
+        message: 'If this number is registered, an OTP has been sent.',
+      });
     }
 
-    // Generate a random token and hash it before storing
-    const rawToken = crypto.randomBytes(32).toString('hex');
-    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+    if (user.isBlocked) {
+      return res
+        .status(403)
+        .json({ success: false, message: 'Your account has been blocked. Contact support.' });
+    }
 
-    user.resetPasswordToken = hashedToken;
-    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
+    // Rate-limit: block if a valid OTP was sent in the last 60 seconds
+    if (user.resetPasswordExpire && user.resetPasswordExpire > Date.now() + 9 * 60 * 1000) {
+      return res.status(429).json({
+        success: false,
+        message: 'OTP already sent. Please wait 60 seconds before requesting again.',
+      });
+    }
+
+    const otp = generateOTP();
+    user.resetPasswordToken = hashOTP(otp);
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
     await user.save({ validateBeforeSave: false });
 
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${rawToken}`;
-
+    // Send SMS via Twilio
     try {
-      const transporter = createTransporter();
-      await transporter.sendMail({
-        from: `"StudyHub" <${process.env.EMAIL_USER}>`,
-        to: user.email,
-        subject: 'Reset Your StudyHub Password',
-        html: `
-          <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;background:#07081A;color:#f1f5f9;padding:32px;border-radius:16px;">
-            <h2 style="color:#a78bfa;margin-bottom:8px;">Password Reset Request</h2>
-            <p style="color:#94a3b8;margin-bottom:24px;">Hi ${user.fullName}, we received a request to reset your password.</p>
-            <a href="${resetUrl}"
-               style="display:inline-block;padding:14px 28px;background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;">
-              Reset Password
-            </a>
-            <p style="color:#64748b;font-size:13px;margin-top:24px;">This link expires in <strong style="color:#f1f5f9;">15 minutes</strong>. If you didn't request this, you can safely ignore this email.</p>
-            <hr style="border:none;border-top:1px solid rgba(255,255,255,.08);margin:24px 0;" />
-            <p style="color:#475569;font-size:12px;">Or paste this link in your browser:<br/><span style="color:#a78bfa;">${resetUrl}</span></p>
-          </div>
-        `,
+      const client = getTwilioClient();
+      await client.messages.create({
+        body: `Your StudyHub OTP is: ${otp}\nValid for 10 minutes. Do not share with anyone.`,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: `+91${mobile.trim()}`,   // India (+91) — change prefix if needed
       });
-
-      return res.json({ success: true, message: 'If that email is registered, a reset link has been sent.' });
-    } catch (emailError) {
-      // Roll back token if email fails
+    } catch (smsError) {
+      // Roll back if SMS fails
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
       await user.save({ validateBeforeSave: false });
-      console.error('Email error:', emailError);
-      return res.status(500).json({ success: false, message: 'Email could not be sent. Please try again later.' });
+      console.error('Twilio SMS error:', smsError.message);
+      return res
+        .status(500)
+        .json({ success: false, message: 'Failed to send OTP. Please try again.' });
     }
+
+    res.json({ success: true, message: 'OTP sent to your registered mobile number.' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// @desc    Reset password using token
+// @desc    Verify OTP (does NOT reset password yet — just validates)
+// @route   POST /api/auth/verify-otp
+// @access  Public
+exports.verifyOtp = async (req, res) => {
+  try {
+    const { mobile, otp } = req.body;
+
+    if (!mobile || !otp) {
+      return res.status(400).json({ success: false, message: 'Mobile and OTP are required' });
+    }
+
+    const user = await User.findOne({
+      mobile: mobile.trim(),
+      resetPasswordToken: hashOTP(otp.trim()),
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid or expired OTP. Please try again.' });
+    }
+
+    // OTP is valid — issue a short-lived reset session token so the
+    // frontend can call reset-password without re-sending the OTP
+    const resetSessionToken = crypto.randomBytes(32).toString('hex');
+    user.resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(resetSessionToken)
+      .digest('hex');
+    // Keep the same expiry — user has the remaining time to set new password
+    await user.save({ validateBeforeSave: false });
+
+    res.json({
+      success: true,
+      message: 'OTP verified successfully.',
+      resetToken: resetSessionToken,   // sent to frontend, used in next step
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Reset password after OTP verification
 // @route   POST /api/auth/reset-password
 // @access  Public
 exports.resetPassword = async (req, res) => {
   try {
-    const { token, password } = req.body;
+    const { mobile, resetToken, password } = req.body;
 
-    if (!token || !password) {
-      return res.status(400).json({ success: false, message: 'Token and new password are required' });
+    if (!mobile || !resetToken || !password) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Mobile, reset token, and new password are required' });
     }
     if (password.length < 6) {
-      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Password must be at least 6 characters' });
     }
 
-    // Hash the incoming raw token to compare with stored hash
-    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(resetToken.trim())
+      .digest('hex');
 
     const user = await User.findOne({
+      mobile: mobile.trim(),
       resetPasswordToken: hashedToken,
       resetPasswordExpire: { $gt: Date.now() },
     });
 
     if (!user) {
-      return res.status(400).json({ success: false, message: 'Reset link is invalid or has expired' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Session expired. Please request a new OTP.' });
     }
 
     user.password = password;
