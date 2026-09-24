@@ -98,7 +98,17 @@ export default function LoginPage() {
 
             {/* Password */}
             <div>
-              <label style={{ display:'block', fontSize:13, fontWeight:600, color:'#94a3b8', marginBottom:8 }}>Password</label>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8 }}>
+                <label style={{ fontSize:13, fontWeight:600, color:'#94a3b8' }}>Password</label>
+                <Link href="/forgot-password">
+                  <span style={{ fontSize:12, color:'#7c3aed', cursor:'pointer', transition:'color .2s' }}
+                    onMouseEnter={e => (e.currentTarget as HTMLSpanElement).style.color = '#a78bfa'}
+                    onMouseLeave={e => (e.currentTarget as HTMLSpanElement).style.color = '#7c3aed'}
+                  >
+                    Forgot password?
+                  </span>
+                </Link>
+              </div>
               <div style={{ position:'relative' }}>
                 <Lock size={16} color="#475569" style={{ position:'absolute', left:14, top:'50%', transform:'translateY(-50%)' }} />
                 <input
