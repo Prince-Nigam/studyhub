@@ -41,17 +41,28 @@ export default function AdminVideosPage() {
 
   const handleClassChange = async (classId: string) => {
     setForm(f => ({ ...f, classId, subjectId: '', chapterId: '' }));
+    setSubjects([]);
+    setChapters([]);
     if (classId) {
-      const res = await api.get(`/subjects?classId=${classId}`);
-      setSubjects(res.data.data);
+      try {
+        const res = await api.get(`/subjects?classId=${classId}`);
+        setSubjects(res.data.data || []);
+      } catch {
+        toast.error('Failed to load subjects');
+      }
     }
   };
 
   const handleSubjectChange = async (subjectId: string) => {
     setForm(f => ({ ...f, subjectId, chapterId: '' }));
+    setChapters([]);
     if (subjectId) {
-      const res = await api.get(`/chapters?subjectId=${subjectId}`);
-      setChapters(res.data.data);
+      try {
+        const res = await api.get(`/chapters?subjectId=${subjectId}`);
+        setChapters(res.data.data || []);
+      } catch {
+        toast.error('Failed to load chapters');
+      }
     }
   };
 

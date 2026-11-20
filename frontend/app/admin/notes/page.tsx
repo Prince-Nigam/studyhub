@@ -57,21 +57,24 @@ export default function AdminNotesPage() {
 
   const handleClassChange = async (classId: string) => {
     setForm(f => ({ ...f, classId, subjectId: '', chapterId: '' }));
+    setSubjects([]);
+    setChapters([]);
     if (classId) {
       try {
         const res = await api.get(`/subjects?classId=${classId}`);
-        setSubjects(res.data.data);
-      } catch { }
+        setSubjects(res.data.data || []);
+      } catch { toast.error('Failed to load subjects'); }
     }
   };
 
   const handleSubjectChange = async (subjectId: string) => {
     setForm(f => ({ ...f, subjectId, chapterId: '' }));
+    setChapters([]);
     if (subjectId) {
       try {
         const res = await api.get(`/chapters?subjectId=${subjectId}`);
-        setChapters(res.data.data);
-      } catch { }
+        setChapters(res.data.data || []);
+      } catch { toast.error('Failed to load chapters'); }
     }
   };
 
